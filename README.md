@@ -32,12 +32,13 @@ In the original Game of Life, the status of every cell in the world follows a si
 ![Orignal Game](images/original.png)
 
 To make the evolution more interesting, we will add a new set of rules to simulate the development of villages, cities and nations:  
+<details><summary>### Map</summary>
 
-### Map
 - Any 20x20 block with more than 20 living cells would automatically upgrade to a village.
 - Any 50x50 block with more than 50 cells would upgrade to a city. 
 - Any 1000x1000 block with more than 20 cities would upgrade to a nation. 
 - Once an entity is upgraded to a higher level, it will never downgrade even when the population falls below the criteria of its current level, unless population dies down to zero or it’s conquered by an entity of lower level. (See the War section)  
+</details>
 
 ### Technology
 Let the history of a village/city/nation be the number of years it has existed, n.
