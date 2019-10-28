@@ -38,5 +38,5 @@ Eryn: 50%
 
 ## Contacts <a name="contacts"></a>
 
-<a href="https://github.com/yatinghan" >Yating Han</a> (yatingh at andrew) 
+<a href="https://github.com/yatinghan" >Yating Han</a> (yatingh at andrew)   
 <a href="https://github.com/yatinghan"> Yuying "Eryn" Qian</a> (yuyingq at andrew)
