@@ -58,6 +58,8 @@ Let the history of a village/city/nation be the number of years it has existed, 
 - Any two nations D3 distance apart or closer would go to war. The winner will colonize the loser if the power ratio (winner power/ loser power) is greater or equal to 2. Otherwise, the map remains unchanged. 
 </details>
 
+____
+
 ## Work Breakdown <a name="work_breakdown"></a>
 Yating: 50%  
 Eryn: 50% 
