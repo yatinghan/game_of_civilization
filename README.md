@@ -1,3 +1,13 @@
+(setq markdown-xhtml-header-content
+      "<style type='text/css'>
+a { 
+  color: #eaeaea; 
+  text-decoration: none;
+  }
+a:hover { text-decoration: underline; }
+</style>")
+
+
 ## GAME OF CIVILIZATION
 
 ## Authors
