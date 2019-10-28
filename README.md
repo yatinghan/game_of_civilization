@@ -4,16 +4,18 @@
 Yating Han (yatingh)  
 Yuying Qian (yuyingq)
 
-## Table of contents
+## Links
+<a href="https://github.com/yatinghan/game_of_civilization"> Project Repo </a>  
+<a href="https://yatinghan.github.io/game_of_civilization"> Project Website </a>  
 
+## Table of contents
 - [Getting Started](#getting_started)
 - [Project Proposal](#project_proposal)
 - [Work Breakdown](#work_breakdown)
 - [Contacts](#contacts)
 
 ## Getting Started <a name="getting_started"></a>
-<a href="https://github.com/yatinghan/game_of_civilization"> Project Repo </a>  
-<a href="https://yatinghan.github.io/game_of_civilization"> Project Website </a>  
+
 ### Running the Game
 
 ## Project Proposal <a name="project_proposal"></a>
