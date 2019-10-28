@@ -1,5 +1,9 @@
 ## GAME OF CIVILIZATION
 
+## Authors
+Yating Han (yatingh)  
+Yuying Qian (yuyingq)
+
 ## Table of contents
 
 - [Getting Started](#getting_started)
@@ -8,8 +12,9 @@
 - [Contacts](#contacts)
 
 ## Getting Started <a name="getting_started"></a>
-Hello
-
+<a href="https://github.com/yatinghan/game_of_civilization"> Project Repo </a>  
+<a href="https://yatinghan.github.io/game_of_civilization"> Project Website </a>  
+### Running the Game
 
 ## Project Proposal <a name="project_proposal"></a>
 
