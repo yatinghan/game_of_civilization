@@ -1,11 +1,10 @@
-(setq markdown-xhtml-header-content
-      "<style type='text/css'>
+<style type='text/css'>
 a { 
-  color: #eaeaea; 
+  color: #ebdbb2; 
   text-decoration: none;
   }
 a:hover { text-decoration: underline; }
-</style>")
+</style>
 
 
 ## GAME OF CIVILIZATION
@@ -15,8 +14,8 @@ Yating Han (yatingh)
 Yuying Qian (yuyingq)
 
 ## Links
-- <a href="https://github.com/yatinghan/game_of_civilization" style="text-decoration: none; color:#eaeaea"> Project Repo </a>  
-- <a href="https://yatinghan.github.io/game_of_civilization" style="text-decoration: none; color:#eaeaea"> Project Website </a>  
+- <a href="https://github.com/yatinghan/game_of_civilization"> Project Repo </a>  
+- <a href="https://yatinghan.github.io/game_of_civilization"> Project Website </a>  
 
 ## Table of contents
 - [Running the Game](#running_the_game)
@@ -48,5 +47,5 @@ Eryn: 50%
 
 ## Contacts <a name="contacts"></a>
 
-<a href="https://github.com/yatinghan" >Yating Han </a> (yatingh at andrew)  
-<a href="https://github.com/yatinghan"> Yuying "Eryn" Qian </a> (yuyingq at andrew) 
+<a href="https://github.com/yatinghan" >Yating Han</a> <p> (yatingh at andrew) </p> 
+<a href="https://github.com/yatinghan"> Yuying "Eryn" Qian</a> <p> (yuyingq at andrew) </p>
