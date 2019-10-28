@@ -1,11 +1,4 @@
-<style type='text/css'>
-a { 
-  color: #b5e853; 
-  text-decoration: none;
-  }
-a:hover { text-decoration: underline; }
-</style>
-
+@import "{{ site.theme }}";
 
 ## GAME OF CIVILIZATION
 
