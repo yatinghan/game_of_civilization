@@ -1,5 +1,3 @@
-@import "{{ site.theme }}";
-
 ## GAME OF CIVILIZATION
 
 ## Authors
@@ -17,7 +15,7 @@ Yuying Qian (yuyingq)
 - [Contacts](#contacts)
 
 ## Running the Game <a name="running_the_game"></a>
-No code yet :(
+No code yet :‘(
 
 ## Project Proposal <a name="project_proposal"></a>
 
