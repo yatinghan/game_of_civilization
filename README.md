@@ -12,7 +12,18 @@ Hello
 
 
 ## Project Proposal <a name="project_proposal"></a>
-Hello
+
+### Project Summary
+We are going to implement an enhanced version of Conway’s Game of Life, i.e. Game of Civilization, on GPU, to simulate the evolution of lives, villages, cities and nations.  
+
+### Background
+In the original Game of Life, the status of every cell in the world follows a simple set of rules:
+- Any live cell with fewer than two live neighbours dies, as if by underpopulation.
+- Any live cell with two or three live neighbours lives on to the next generation.
+- Any live cell with more than three live neighbours dies, as if by overpopulation.
+- Any dead cell with exactly three live neighbours becomes a live cell, as if by reproduction.
+
+![Orignal Game](images/original.jpg)
 
 ## Work Breakdown <a name="work_breakdown"></a>
 Yating: 50%  
