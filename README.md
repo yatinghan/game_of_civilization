@@ -1,19 +1,16 @@
 ## GAME OF CIVILIZATION
 
+## Table of contents
 
-<details><summary>CLICK ME</summary>
-<p>
+- [Getting Started](#getting_started)
+- [Project Proposal](#project_proposal)
 
-#### yes, even hidden code blocks!
-
-```python
-print("hello world!")
-```
-
-</p>
-</details>
-
+## Getting Started
 Hello
+
+## Project Proposal
+Hello
+
 
 You can use the [editor on GitHub](https://github.com/yatinghan/game_of_civilization/edit/master/README.md) to maintain and preview the content for your website in Markdown files.
 
