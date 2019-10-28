@@ -1,6 +1,6 @@
 <style type='text/css'>
 a { 
-  color: #ebdbb2; 
+  color: #b5e853; 
   text-decoration: none;
   }
 a:hover { text-decoration: underline; }
