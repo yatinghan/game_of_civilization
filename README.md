@@ -9,10 +9,10 @@ Yuying Qian (yuyingq)
 <a href="https://yatinghan.github.io/game_of_civilization"> Project Website </a>  
 
 ## Table of contents
-[Running the Game](#running_the_game)
-[Project Proposal](#project_proposal)
-[Work Breakdown](#work_breakdown)
-[Contacts](#contacts)
+[Running the Game](#running_the_game)  
+[Project Proposal](#project_proposal)  
+[Work Breakdown](#work_breakdown)  
+[Contacts](#contacts)  
 
 ## Running the Game <a name="running_the_game"></a>
 No code yet :‘(
