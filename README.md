@@ -5,7 +5,7 @@
 - [Getting Started](#getting_started)
 - [Project Proposal](#project_proposal)
 
-## Getting Started
+## Getting Started <a name="getting_started"></a>
 Hello
 
 
@@ -47,5 +47,5 @@ Your Pages site will use the layout and styles from the Jekyll theme you have se
 
 Having trouble with Pages? Check out our [documentation](https://help.github.com/categories/github-pages-basics/) or [contact support](https://github.com/contact) and we’ll help you sort it out.
 
-## Project Proposal
+## Project Proposal <a name="project_proposal"></a>
 Hello
