@@ -13,9 +13,12 @@ Yuying Qian (yuyingq)
 [Project Proposal](#project_proposal)  
 [Work Breakdown](#work_breakdown)  
 [Contacts](#contacts)  
+____
 
 ## Running the Game <a name="running_the_game"></a>
 No code yet :‘(
+
+____
 
 ## Project Proposal <a name="project_proposal"></a>
 
@@ -41,12 +44,14 @@ To make the evolution more interesting, we will add a new set of rules to simula
 </details>
 
 <details><summary>Technology</summary>
+
 Let the history of a village/city/nation be the number of years it has existed, n.
 - The technology index of a village or city = n/4
 - The initial technology index of a nation (when n=0) follows the city with highest technology index. The index would increment by 2 every subsequent year.   
 </details>
 
 <details><summary>War</summary>
+
 - Power of any entity = technology index * population
 - Entity with higher power wins the war and conquers the opponent entity. 
 - Villages will not engage in wars. 
@@ -64,6 +69,7 @@ ____
 Yating: 50%  
 Eryn: 50% 
 
+____
 
 ## Contacts <a name="contacts"></a>
 
