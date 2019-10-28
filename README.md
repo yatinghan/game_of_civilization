@@ -23,7 +23,7 @@ In the original Game of Life, the status of every cell in the world follows a si
 - Any live cell with more than three live neighbours dies, as if by overpopulation.
 - Any dead cell with exactly three live neighbours becomes a live cell, as if by reproduction.
 
-![Orignal Game](images/original.jpg)
+![Orignal Game](images/original.png)
 
 ## Work Breakdown <a name="work_breakdown"></a>
 Yating: 50%  
