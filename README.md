@@ -1,4 +1,18 @@
-## Welcome to GitHub Pages
+## GAME OF CIVILIZATION
+
+
+<details><summary>CLICK ME</summary>
+<p>
+
+#### yes, even hidden code blocks!
+
+```python
+print("hello world!")
+```
+
+</p>
+</details>
+
 
 You can use the [editor on GitHub](https://github.com/yatinghan/game_of_civilization/edit/master/README.md) to maintain and preview the content for your website in Markdown files.
 
