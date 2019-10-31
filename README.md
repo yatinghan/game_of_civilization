@@ -101,6 +101,7 @@ Kernel will be implemented in CUDA so that it can run on GPU, while the GUI will
 
 
 #### Schedule
+
 | Timeline     | Task | Goal |
 | ----------- | ----------- | ----------- | 
 | November Week 1   | The original Game of Life      |  The game can take in an initial population configuration and simulate the evolution automatically which only follows the 4 fundamental rules of life. |
