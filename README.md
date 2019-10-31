@@ -103,7 +103,6 @@ Kernel will be implemented in CUDA so that it can run on GPU, while the GUI will
 #### Schedule
 <table>
   <tbody>
-    <tr> </tr>
     <tr>
       <th>Timeline</th>
       <th>Task</th>
@@ -137,6 +136,8 @@ Kernel will be implemented in CUDA so that it can run on GPU, while the GUI will
     </tr>
   </tbody>
 </table>
+
+
 ____
 
 ## Work Breakdown <a name="work_breakdown"></a>
