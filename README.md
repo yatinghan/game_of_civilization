@@ -138,8 +138,6 @@ Kernel will be implemented in CUDA so that it can run on GPU, while the GUI will
 </table>
 
 
-____
-
 ## Work Breakdown <a name="work_breakdown"></a>
 Yating: 50%  
 Eryn: 50% 
