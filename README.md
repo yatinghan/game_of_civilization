@@ -63,6 +63,53 @@ Let the history of a village/city/nation be the number of years it has existed, 
 - Any two nations D3 distance apart or closer would go to war. The winner will colonize the loser if the power ratio (winner power/ loser power) is greater or equal to 2. Otherwise, the map remains unchanged. 
 </details>
 
+### Approach 
+By the end of the semester, we want to parallelize the simulation by breaking it down to the following:
+- Compute whether the cell is dead or alive for all cells.
+- Find all entities on the map. 
+- Track technology advancement for all existing entities. 
+- Search enemies close to the border for all entities and update the entities according to the war results. 
+These segments of computation could benefit from parallelism because the homogenous computation is applied many times on a large number of inputs.
+
+### The Challenge
+- Load balancing: Entities are not evenly distributed on the map, thus load balancing is important to achieving optimal performance. 
+- Minimize communication between processors: each cell needs the information of all neighbors in order to determine its own status in the next epoch. 
+- Efficient search of entities: there are multiple potential approaches of doing this, like QuadTree, convolution, or a naive search by cities. We need to analyze the complexity, communication costs, locality and memory access characteristics of the algorithms before we can determine which one might achieve the highest performance. We may use OpenMP instead of CUDA for this part of the computation, depending on our conclusion of the algorithm analysis. 
+
+### Resources
+We are planning to run the game on GPU. Depending on the scope of the project, we might also implement a CPU version and compare the results. The code will be written from scratch. 
+
+### Goals and Deliverables
+#### Plan to achieve:
+- Build the GUI that takes in an initial population configuration and runs the evolution simulation. 
+- Implement all the rules described in Section Background.
+- Implement a sequential version and a parallel version respectively to examine the speedup. 
+- Tune the parameters to optimize the performance.
+#### Hope to achieve:
+- Implement the game in ISPC on CPU and compare the performance with the CUDA version.
+- We can add in more rules (e.g. rules of trade, rules of natural disasters, rules of diseases) to make the evolution more interesting. 
+- Visualize the evolution progress with real time heat diagram of population distribution in the world.
+#### Demo:
+- A trial run of the game.
+
+### Platform Choice
+#### Computer:
+We choose to run the game on GPU because a set of homogenous computation needs to be done for each cell and  it’s easy to map the cells in the world map to the threads on GPU. 
+
+#### Language:
+Kernel will be implemented in CUDA so that it can run on GPU, while the GUI will be implemented in Python to make our life easier. 
+
+
+#### Schedule
+| Timeline     | Task | Goal |
+| ----------- | ----------- | ----------- | 
+| November Week 1   | The original Game of Life      |  The game can take in an initial population configuration and simulate the evolution automatically which only follows the 4 fundamental rules of life. |
+| November Week 2 | Rules of War and Technology | The game is able to identify (1) The villages, cities and nations on the map and mark the territories with different colors; (2) Which of the entities would declare war on each other and compute the population change due to the conflicts. |
+| Checkpoint: Nov 18 | Checkpoint Writeup |Update the project web page and submit the writeup to Gradescope |
+| November Week 3 | The parallel implementation | Implement the CUDA version of the game and examine the speedup. |
+| November Week 4 |Parameter tuning |Optimize the performance |
+| December Week 1 | Final project report (10 pages) |Final project report submission by Monday, Dec 9th. |
+
 ____
 
 ## Work Breakdown <a name="work_breakdown"></a>
