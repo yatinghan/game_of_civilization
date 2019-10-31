@@ -111,6 +111,42 @@ Kernel will be implemented in CUDA so that it can run on GPU, while the GUI will
 | November Week 4 |Parameter tuning |Optimize the performance |
 | December Week 1 | Final project report (10 pages) |Final project report submission by Monday, Dec 9th. |
 
+
+<table>
+  <tbody>
+    <tr>
+      <th>Timeline</th>
+      <th>Task</th>
+      <th>Goal</th>
+    </tr>
+    <tr>
+      <th>November Week 1</th>
+      <th>The original Game of Life</th>
+      <th>The game can take in an initial population configuration and simulate the evolution automatically which only follows the 4 fundamental rules of life.</th>
+    </tr>
+      <th>November Week 2</th>
+      <th>Rules of War and Technology</th>
+      <th>The game is able to identify (1) The villages, cities and nations on the map and mark the territories with different colors; (2) Which of the entities would declare war on each other and compute the population change due to the conflicts.</th>
+    </tr>
+      <th>Checkpoint: Nov 18</th>
+      <th>Checkpoint Writeup</th>
+      <th>Update the project web page and submit the writeup to Gradescope</th>
+    </tr>
+    <tr>
+      <th>November Week 3</th>
+      <th>The parallel implementation</th>
+      <th>Implement the CUDA version of the game and examine the speedup. </th>
+    </tr>
+      <th>November Week 4</th>
+      <th>Parameter tuning</th>
+      <th>Optimize the performance</th>
+    </tr>
+      <th>December Week 1</th>
+      <th>Final project report (10 pages)</th>
+      <th>Final project report submission by Monday, Dec 9th.</th>
+    </tr>
+  </tbody>
+</table>
 ____
 
 ## Work Breakdown <a name="work_breakdown"></a>
