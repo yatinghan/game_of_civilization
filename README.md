@@ -100,7 +100,7 @@ We choose to run the game on GPU because a set of homogenous computation needs t
 Kernel will be implemented in CUDA so that it can run on GPU, while the GUI will be implemented in Python to make our life easier. 
 
 
-#### Schedule
+### Schedule
 <table>
   <tbody>
     <tr>
