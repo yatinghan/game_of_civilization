@@ -10,6 +10,7 @@ Yuying Qian (yuyingq)
 
 ## Table of contents
 [Running the Game](#running_the_game)  
+[Project Checkpoint](#project_checkpoint)  
 [Project Proposal](#project_proposal)  
 [Work Breakdown](#work_breakdown)  
 [Contacts](#contacts)  
@@ -18,6 +19,87 @@ ____
 ## Running the Game <a name="running_the_game"></a>
 No code yet :‘(
 
+____
+
+## Project Checkpoint <a name="project_checkpoint"></a>
+
+### Project Status
+We’ve successfully implemented the original game of life. It does not have a visualization yet. However, we can see it working from terminal output. However, we discovered some major design flaws in the game. In the proposal, we described three types of “civilizations”: village, city, and nation. As we discussed the implementation details, we realized that area division of these entities are exactly the same in terms of algorithm design / parallelization: we could just traverse through each “square” and determine if it meets the requirements we defined. A major flaw in this design is that every entity could be characterized by multiple overlapping squares, depending on where the center is. In addition, we proposed that all nations should be squares which is not the case in real world. Therefore, we want to switch to a simpler rule (with just “tribes” and “nations”) but use a more precise (and interesting) algorithm for characterization. 
+
+Here are the revised rules:
+<details><summary>Original Rules </summary>
+- Any live cell with fewer than two live neighbours dies, as if by underpopulation.
+- Any live cell with two or three live neighbours lives on to the next generation.
+- Any live cell with more than three live neighbours dies, as if by overpopulation.
+- Any dead cell with exactly three live neighbours becomes a live cell, as if by reproduction.
+</details>
+
+<details><summary>Map</summary>
+- Any living population belongs to a tribe. Nearby lives belongs to the same tribe. (detailed rule determined by the search algorithm)
+- If tribes are in close proximity, they will unite with each other and form a nation.
+</details>
+
+<details><summary>Technology & War</summary>
+- Only tribes above a basic power level may declare war. 
+- Truce condition: Entities engaged in war in a certain round will not go to war again in the next 5 rounds.
+</details>
+
+The first phase is still updating the pixels, which follows the original game rules. It will be done with a relatively simple CUDA function because each pixel only depends on itself and its neighbor. The second phase will be doing some graph searching or clustering on the 2D array and determining the boundaries of the cities and nations. We are still planning to use CUDA, subjected to change as discussed in the issue section. It is more challenging than the algorithm we described in the proposal, as graphs are inherently recursive data structure and is hard to parallelize using CUDA. We will use BFS which offers more opportunities for parallelism. Finally, we will pairwise-compare the civilizations and determine if they should go to war, then update the pixels once again.
+
+### Evaluation
+Because we revisited the rules, we are about one week behind schedule. However, we believe that we will still get all the deliverables done because we will both stay on campus during Thanksgiving break. As we revisited the algorithm, we will probably have more interesting nice-to-haves such as implementing different graph searching algorithm or clustering. 
+
+We plan to achieve the following:
+- Build the GUI that takes in an initial population configuration and runs the evolution simulation.
+- Implement all the rules described in Section Background.
+- Parallelize the algorithm with Cuda and OpenMP.
+Nice-to-haves:
+--Explore more frameworks on graphs-
+- Implement a version with clustering.
+
+### Issues
+We noticed several loopholes in our design of the game rules, like the characterization of entity territory(mentioned in the first section), the expansion rule of a nation (as of now, once the first nation is established, it will soon devour all the nearby entities because the war condition is too easy to be triggered), lack of truce condition (if two entities go to war in a certain round, they will continue fighting in the subsequent rounds until one of them dies or downgrades), etc etc. We realize game design is not as simple as we thought it is :)
+We are trying to evaluate which programming model works the best for graph computation. When traversing the map to compute area division of the cities, each 10x10 block is treated as a vertex on the graph and the close ones are grouped into the same city(vertex). To find nations, every city is treated as a vertex and vertices(cities) that are close to each other are grouped together to form a cluster(nation). Although we used CUDA to implement the basic rules of life, where each member of the population is evaluated using the exact same logic, it might not be the best choice for graph computation. From what we learned from assignment 3, it seems OpenMP would work better for algorithms involving recursion. However, the program does not work quite right. We’re still debugging the issue. Our next step is either improving our existing algorithms or exploring new frameworks like GraphLab or trying new algorithms like K-means clustering (which we now think might be a more reasonable choice). Experiments with different kinds of implementations could be pretty time consuming. 
+
+### Updated Schedule 
+<table>
+  <tbody>
+    <tr>
+      <th>Timeline</th>
+      <th>Task</th>
+      <th>Goal</th>
+    </tr>
+    <tr>
+      <th>November Week 3 A</th>
+      <th>The parallel implementation</th>
+      <th>Use CUDA to parallelize basic rules of life</th>
+      <th>Both</th>
+    </tr>
+    <tr>
+      <th>November Week 3 B</th>
+      <th>BFSn</th>
+      <th>Parallelize BFS algorithm in area division </th>
+      <th>Both</th>
+    </tr>
+    <tr>
+      <th>November Week 4 A</th>
+      <th>K-means Clustering</th>
+      <th>Parallelize K-means clustering in area division</th>
+      <th>Both</th>
+    </tr>
+    <th>November Week 4 B</th>
+      <th>Parameter tuning</th>
+      <th>Optimize the performance</th>
+      <th>Both</th>
+    </tr>
+    <tr>
+      <th>December Week 1</th>
+      <th>Final project report (10 pages)</th>
+      <th>Final project report submission by Friday, Dec 6th.</th>
+      <th>Both</th>
+    </tr>
+  </tbody>
+</table>
 ____
 
 ## Project Proposal <a name="project_proposal"></a>
