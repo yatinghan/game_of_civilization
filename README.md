@@ -28,20 +28,26 @@ We’ve successfully implemented the original game of life. It does not have a v
 
 Here are the revised rules:
 <details><summary>Original Rules </summary>
+  
 - Any live cell with fewer than two live neighbours dies, as if by underpopulation.  
 - Any live cell with two or three live neighbours lives on to the next generation.  
 - Any live cell with more than three live neighbours dies, as if by overpopulation.  
 - Any dead cell with exactly three live neighbours becomes a live cell, as if by reproduction.  
+
 </details>
 
 <details><summary>Map</summary>
+  
 - Any living population belongs to a tribe. Nearby lives belongs to the same tribe. (detailed rule determined by the search algorithm)  
-- If tribes are in close proximity, they will unite with each other and form a nation.  
+- If tribes are in close proximity, they will unite with each other and form a nation.
+
 </details>
 
 <details><summary>Technology & War</summary>
+  
 - Only tribes above a basic power level may declare war.   
 - Truce condition: Entities engaged in war in a certain round will not go to war again in the next 5 rounds.  
+
 </details>
 
 The first phase is still updating the pixels, which follows the original game rules. It will be done with a relatively simple CUDA function because each pixel only depends on itself and its neighbor. The second phase will be doing some graph searching or clustering on the 2D array and determining the boundaries of the cities and nations. We are still planning to use CUDA, subjected to change as discussed in the issue section. It is more challenging than the algorithm we described in the proposal, as graphs are inherently recursive data structure and is hard to parallelize using CUDA. We will use BFS which offers more opportunities for parallelism. Finally, we will pairwise-compare the civilizations and determine if they should go to war, then update the pixels once again.
