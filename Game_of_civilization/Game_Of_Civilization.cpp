@@ -16,7 +16,7 @@ private:
 	// Intiliazing the grid. 
 	int grid[M][N] = {{0}};
 	int future[M][N] = {{0}};
-	string filename = "/home/erynqian/15418/game_of_civilization/config.txt";
+	string filename = "config.txt";
 
 	void init_grid_from_file()
 	{
@@ -132,3 +132,6 @@ int main(int argc, char** argv)
     auto game = GameOfLife();
     game.Run();
 }
+
+
+
