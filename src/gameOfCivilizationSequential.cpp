@@ -13,20 +13,18 @@
 
 #include "gameOfCivilizationSequential.h"
 
+#define IDX(X, Y) ((X) * this->width + (Y)) 
+
 using namespace std;
 
 SequentialGame::SequentialGame(int W, int H, std::string filename) {
 
     this->width = W;
     this->height = H;
-    this->grid.resize(W);
-    for (int i = 0; i < W; i++) {
-        grid[i].resize(H);
-    }
-    this->future.resize(W);
-    for (int i = 0; i < W; i++) {
-        future[i].resize(H);
-    }
+    this->grid.resize(W*H);
+    std::fill(this->grid.begin(), this->grid.end(), 0);
+    this->future.resize(W*H);
+    //std::fill(this->future.begin(), this->future.end(), 0);
 
     ifstream readfile(filename);
     if ( readfile.is_open() )
@@ -41,7 +39,7 @@ SequentialGame::SequentialGame(int W, int H, std::string filename) {
             getline(ss,yy,' ');
             x = stoi(xx);
             y = stoi(yy);
-            this->grid[x][y] = true;
+            this->grid[IDX(x, y)] = true;
         }
     } 
     else {
@@ -51,11 +49,11 @@ SequentialGame::SequentialGame(int W, int H, std::string filename) {
 
 void
 SequentialGame::printGrid() {
-    for (int i = 0; i < this->width; i++) 
+    for (int i = 0; i < this->height; i++) 
     { 
-        for (int j = 0; j < this->height; j++) 
+        for (int j = 0; j < this->width; j++) 
         { 
-            if (this->grid[i][j] == 0) 
+            if (this->grid[IDX(i, j)] == 0) 
                 cout << ". "; 
             else
                 cout << "* "; 
@@ -67,41 +65,42 @@ SequentialGame::printGrid() {
 void 
 SequentialGame::advanceGame()  {
     // Loop through every cell 
-    for (int l = 1; l < width - 1; l++) 
+    for (int l = 1; l < height - 1; l++) 
     { 
-        for (int m = 1; m < height - 1; m++) 
+        for (int m = 1; m < width - 1; m++) 
         { 
             // finding no Of Neighbours that are alive 
             int aliveNeighbours = 0; 
             for (int i = -1; i <= 1; i++) 
                 for (int j = -1; j <= 1; j++) 
-                    aliveNeighbours += this->grid[l + i][m + j]; 
+                    aliveNeighbours += this->grid[IDX(l + i, m + j)]; 
 
             // The cell needs to be subtracted from 
             // its neighbours as it was counted before 
-            aliveNeighbours -= this->grid[l][m]; 
+            aliveNeighbours -= this->grid[IDX(l, m)]; 
 
             // Implementing the Rules of Life 
 
             // Cell is lonely and dies 
-            if ((this->grid[l][m] == 1) && (aliveNeighbours < 2)) 
-                this->future[l][m] = 0; 
+            if ((this->grid[IDX(l, m)] == 1) && (aliveNeighbours < 2)) 
+                this->future[IDX(l, m)] = 0; 
 
             // Cell dies due to over population 
-            else if ((this->grid[l][m] == 1) && (aliveNeighbours > 3)) 
-                this->future[l][m] = 0; 
+            else if ((this->grid[IDX(l, m)] == 1) && (aliveNeighbours > 3)) 
+                this->future[IDX(l, m)] = 0; 
 
             // A new cell is born 
-            else if ((this->grid[l][m] == 0) && (aliveNeighbours == 3)) 
-                this->future[l][m] = 1; 
+            else if ((this->grid[IDX(l, m)] == 0) && (aliveNeighbours == 3)) 
+                this->future[IDX(l, m)] = 1; 
 
             // Remains the same 
             else
-                this->future[l][m] = this->grid[l][m]; 
+                this->future[IDX(l, m)] = this->grid[IDX(l, m)]; 
+
         } 
     } 
 
-    cout << "Next Generation" << endl; 
+    // cout << "Next Generation" << endl; 
     swap(grid, future);
-    printGrid();
+    // printGrid();
 }

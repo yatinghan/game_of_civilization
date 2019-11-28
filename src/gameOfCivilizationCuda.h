@@ -1,5 +1,5 @@
-#ifndef __GAME_OF_CIVILIZATION_SEQUENTIAL_H__
-#define __GAME_OF_CIVILIZATION_SEQUENTIAL_H__
+#ifndef __GAME_OF_CIVILIZATION_CUDA_H__
+#define __GAME_OF_CIVILIZATION_CUDA_H__
 
 #include "gameOfCivilization.h"
 
@@ -7,23 +7,29 @@
 #include <iostream>
 #include <string>
 
-class SequentialGame : public Game {
+class CudaGame : public Game {
 
 private:
-
     int width;
     int height;
     std::vector<int> grid;
     std::vector<int> future;
 
+    //cuda variables
+    int* cudaDeviceGrid;
+    int* cudaDeviceFuture;
+
 public:
 
-    SequentialGame(int width, int height, std::string filename);
+    CudaGame(int width, int height, std::string filename);
     //virtual ~SequentialRenderer();
 
+    void setup();
+    
     void printGrid();
 
     void advanceGame();
+
 
     //void render();
 
