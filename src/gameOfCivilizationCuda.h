@@ -21,7 +21,7 @@ private:
 
 public:
 
-    CudaGame(int width, int height, std::string filename);
+    CudaGame(int W, int H, std::string filename);
     //virtual ~SequentialRenderer();
 
     void setup();

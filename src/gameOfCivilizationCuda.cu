@@ -10,17 +10,19 @@
 #include <sstream>
 #include <vector>
 #include <string>
+#include <stdio.h>
 
 #include <cuda.h>
 #include <cuda_runtime.h>
 #include <driver_functions.h>
 #include <assert.h>
 
-#include "gameOfCivilizationSequential.h"
+#include "gameOfCivilizationCuda.h"
 
 #define BLOCK_WIDTH 32
 #define BLOCK_HEIGHT 32
 #define BLOCK_SIZE 1024
+#define IDX(X, Y) ((X) * width + (Y))
 
 using namespace std;
 
@@ -49,17 +51,14 @@ __constant__ GlobalConstants cuConstRendererParams;
 ////////////////////////////////////////////////////////////////////////////////////////
 
 
-CudaGame::CudaGame(int width, int height, std::string filename) {
+CudaGame::CudaGame(int W, int H, std::string filename) {
     this->width = W;
+    int width = W;
     this->height = H;
-    this->grid.resize(W);
-    for (int i = 0; i < W; i++) {
-        grid[i].resize(H);
-    }
-    this->future.resize(W);
-    for (int i = 0; i < W; i++) {
-        future[i].resize(H);
-    }
+    
+    this->grid.resize(W*H);
+    std::fill(this->grid.begin(), this->grid.end(), 0);
+    this->future.resize(W*H);
 
     ifstream readfile(filename);
     if ( readfile.is_open() )
@@ -74,8 +73,9 @@ CudaGame::CudaGame(int width, int height, std::string filename) {
             getline(ss,yy,' ');
             x = stoi(xx);
             y = stoi(yy);
-            this->grid[x][y] = true;
+            this->grid[IDX(x, y)] = true;
         }
+        setup();
     } 
     else {
         cout << "No such file, try again." << endl;
@@ -84,7 +84,7 @@ CudaGame::CudaGame(int width, int height, std::string filename) {
 
 
 void
-CudaRenderer::setup() {
+CudaGame::setup() {
 
     int deviceCount = 0;
     std::string name;
@@ -154,16 +154,17 @@ CudaGame::printGrid() {
 }
 
 __global__ 
-void kernelRenderPixels() {
-
+void kernelAdvanceGame() {
+    
     //row?
     int l = blockIdx.x * blockDim.x + threadIdx.x;
     //col?
     int m = blockIdx.y * blockDim.y + threadIdx.y;
     int w = cuConstRendererParams.width;
+    int width = cuConstRendererParams.width;
     int h = cuConstRendererParams.height;
 
-    if !(l < h && m < w && l > 0 && l < h-1 && m > 0 && m < w-1) 
+    if (!(l < h && m < w && l > 0 && l < h-1 && m > 0 && m < w-1 )) 
         return;   //not in bound
     
     // finding no Of Neighbours that are alive 
@@ -187,8 +188,10 @@ void kernelRenderPixels() {
         cuConstRendererParams.future[IDX(l, m)] = 0; 
 
     // A new cell is born 
-    else if ((cuConstRendererParams.grid[IDX(l, m)] == 0) && (aliveNeighbours == 3)) 
+    else if ((cuConstRendererParams.grid[IDX(l, m)] == 0) && (aliveNeighbours == 3)) {
         cuConstRendererParams.future[IDX(l, m)] = 1; 
+    }
+        
 
     // Remains the same 
     else
@@ -201,16 +204,19 @@ void kernelRenderPixels() {
 }
 
 void
-CudaRenderer::advanceGame() {
+CudaGame::advanceGame() {
     
     dim3 blockDim(BLOCK_HEIGHT, BLOCK_WIDTH);
     dim3 gridDim((this->height+blockDim.x-1)/ blockDim.x,
                  (this->width+blockDim.y-1) / blockDim.y);
+    // printf("grid dim: %d : %d\n", gridDim.x, gridDim.y);m
                 
     kernelAdvanceGame<<<gridDim, blockDim>>>();
+    
     cudaMemcpy(&(this->future[0]),
                cudaDeviceFuture,
                sizeof(int) * width * height,
                cudaMemcpyDeviceToHost);
+        
     swap(grid, future);
 }
