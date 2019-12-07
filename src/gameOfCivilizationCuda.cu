@@ -140,6 +140,11 @@ CudaGame::setup() {
 
 void 
 CudaGame::printGrid() {
+    cudaMemcpy(&(this->future[0]),
+               cudaDeviceFuture,
+               sizeof(int) * width * height,
+               cudaMemcpyDeviceToHost);
+    swap(grid, future);
     for (int i = 0; i < this->width; i++) 
     { 
         for (int j = 0; j < this->height; j++) 
@@ -213,10 +218,4 @@ CudaGame::advanceGame() {
                 
     kernelAdvanceGame<<<gridDim, blockDim>>>();
     
-    cudaMemcpy(&(this->future[0]),
-               cudaDeviceFuture,
-               sizeof(int) * width * height,
-               cudaMemcpyDeviceToHost);
-        
-    swap(grid, future);
 }
