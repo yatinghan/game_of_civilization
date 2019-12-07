@@ -12,8 +12,29 @@
 #include <string>
 
 #include "gameOfCivilizationSequential.h"
+#include "Area_Division.cpp"
 
 #define IDX(X, Y) ((X) * this->width + (Y)) 
+
+#define RESET   "\033[0m"
+#define BLACK   "\033[40m"      /* Black */
+#define RED     "\033[41m"      /* Red */
+#define GREEN   "\033[42m"      /* Green */
+#define YELLOW  "\033[43m"      /* Yellow */
+#define BLUE    "\033[44m"      /* Blue */
+#define MAGENTA "\033[45m"      /* Magenta */
+#define CYAN    "\033[46m"      /* Cyan */
+#define WHITE   "\033[47m"      /* White */
+#define BOLDBLACK   "\033[1m\033[40m"      /* Bold Black */
+#define BOLDRED     "\033[1m\033[41m"      /* Bold Red */
+#define BOLDGREEN   "\033[1m\033[42m"      /* Bold Green */
+#define BOLDYELLOW  "\033[1m\033[43m"      /* Bold Yellow */
+#define BOLDBLUE    "\033[1m\033[44m"      /* Bold Blue */
+#define BOLDMAGENTA "\033[1m\033[45m"      /* Bold Magenta */
+#define BOLDCYAN    "\033[1m\033[46m"      /* Bold Cyan */
+#define BOLDWHITE   "\033[1m\033[47m"      /* Bold White */
+
+vector<string> colors = {BOLDYELLOW, BOLDGREEN, BOLDBLUE, BOLDRED, BOLDMAGENTA, BOLDCYAN, BOLDBLACK, BOLDWHITE};
 
 using namespace std;
 
@@ -49,14 +70,25 @@ SequentialGame::SequentialGame(int W, int H, std::string filename) {
 
 void
 SequentialGame::printGrid() {
+    
+    Map map = Map(this->height, this->width, 10, this->grid);
+    auto tribes = map.get_tribes();
+    int tribe_index = 2;
+    for (auto t : tribes) {
+        for (auto p : t) this->grid[IDX(p.first, p.second)] = tribe_index;
+        tribe_index ++;
+    }
+
     for (int i = 0; i < this->height; i++) 
     { 
         for (int j = 0; j < this->width; j++) 
         { 
             if (this->grid[IDX(i, j)] == 0) 
                 cout << ". "; 
-            else
+            else if (this->grid[IDX(i, j)] == 1)
                 cout << "* "; 
+            else 
+                cout << colors[(this->grid[IDX(i, j)]-2)%8] << this->grid[IDX(i, j)] << " " << RESET;
         } 
         cout << endl; 
     } 
@@ -73,10 +105,11 @@ SequentialGame::advanceGame()  {
             int aliveNeighbours = 0; 
             for (int i = -1; i <= 1; i++) 
                 for (int j = -1; j <= 1; j++) 
-                    aliveNeighbours += this->grid[IDX(l + i, m + j)]; 
+                    aliveNeighbours += (this->grid[IDX(l + i, m + j)] > 0); 
 
             // The cell needs to be subtracted from 
             // its neighbours as it was counted before 
+            if (this->grid[IDX(l, m)] > 0) this->grid[IDX(l, m)] = 1;
             aliveNeighbours -= this->grid[IDX(l, m)]; 
 
             // Implementing the Rules of Life 
