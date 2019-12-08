@@ -71,7 +71,7 @@ SequentialGame::SequentialGame(int W, int H, std::string filename) {
 void
 SequentialGame::printGrid() {
     
-    Map map = Map(this->height, this->width, 4, this->grid);
+    Map map = Map(this->height, this->width, 8, this->grid);
     auto tribes = map.get_tribes();
     int tribe_index = 2;
     for (auto t : tribes) {

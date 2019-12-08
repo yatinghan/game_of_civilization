@@ -1,8 +1,9 @@
 #include <iostream> 
 #include <iterator> 
-#include <map> 
+#include <queue>
 #include <vector>
 #include <math.h>
+#include <assert.h>
 
 #define CONV_MATRIX_SIZE 10
 #define MAX_POOL_SIZE 4
@@ -26,6 +27,7 @@ private:
     const int M, N; // M = grid height; N = grid width
     const int range;
     vector<Tribe> tribes;
+    vector<int> map; // the map records the citizenship of life on every coordinate
 
     void printIntMatrix(Matrix<int> mat)
     {
@@ -34,8 +36,8 @@ private:
             for (int j = 0; j < mat.width; j++) 
             { 
                 int pop = mat.matrix[i * mat.width + j];
-                if (pop < 10) 
-                    cout << pop << " "; 
+                if (pop < 10 || pop < 0) 
+                    cout << pop << " ";
                 else 
                     cout << pop;
             } 
@@ -139,7 +141,7 @@ private:
      * For each center, add all members within range to the tribe in tribes vector
      */ 
 
-    int isMemberInTribes(Member p)
+    int getTribeMembership(Member p)
     {
         // p coordinates out of bound
         bool withinBound = (0 <= p.first && p.first < M) && (0 <= p.second && p.second < N);
@@ -148,13 +150,16 @@ private:
         // p is not alive
         if (grid[p.first*N+p.second] == 0) return -1;
 
-        // search p's citizenship
-        for (int t = 0; t < tribes.size(); t++) {
-            for (auto m : tribes[t]) {
-                if (m.first == p.first && m.second == p.second) return t;
-            }
+        int tribe_index = map[p.first * N + p.second] == tribes.size() ? -1 : map[p.first * N + p.second];
+        return tribe_index;
+    }
+
+    bool isInTribe(Member p, Tribe t)
+    {
+        for (auto m: t) {
+            if (m.first == p.first && m.second == p.second) return true;
         }
-        return -1;
+        return false;
     }
 
     int searchNearbyTribe(Member p)
@@ -166,41 +171,31 @@ private:
                 float delta_r = abs(neighbor.first - p.first);
                 float delta_c = abs(neighbor.second - p.second);
                 if (delta_c * delta_c + delta_r * delta_r > radius * radius) continue; // distance > radius
-                int t = isMemberInTribes(neighbor);
+                int t = getTribeMembership(neighbor);
                 if (t != -1) return t;
             }
         }
         return -1;
     }
 
-    // int searchNearbyTribe(Member p)
-    // {
-    //     for (int i = 0; i < tribes.size(); i++) {
-    //         for (auto m : tribes[i]) {
-    //             if (abs(p.first - m.first) <= 4 && abs(p.second - m.second) <= 4) {
-    //                 // cout << "Member (" << p.first << "," << p.second << ")";
-    //                 // cout << "found nearby tribe resident (" << m.first << "," << m.second << ")" << endl;
-    //                 return i;
-    //             }
-    //         }
-    //     }
-    //     return -1;
-    // }
+    void register_new_tribe(Tribe newTribe)
+    {
+        if (newTribe.size() >= TRIBE_MIN_POPULATION) {
+            // qualified to establish a new tribe
+            int tribe_index = tribes.size();
+            tribes.push_back(newTribe);
+        }
+        else {
+            // registration failed
+            for (auto m : newTribe) 
+                map[m.first * N + m.second] = -1;
+        }
+    }
 
     void init_tribes() 
     {
         auto conv = this->convolution();
-        // printIntMatrix(conv);
         auto max_pool = this->max_pooling(conv.matrix, conv.height, conv.width);
-        // cout << "\n\n" << endl;
-        // printMemberMatrix(max_pool, conv);
-        // cout << "\n\n" << endl;
-        // cout << "conv.height=" << conv.height << "; conv.width=" << conv.width << endl;
-        // Member lastLeader = max_pool.matrix[max_pool.matrix.size()-1];
-        // cout << "leader at last max_pool matrix:" <<  lastLeader.first << "," << lastLeader.second << endl;
-        // cout << "population at last conv matrix:" <<  conv.matrix[42* conv.width + 42] << endl;
-        // cout << "population at this matrix:" <<  conv.matrix[lastLeader.first* conv.width + lastLeader.second] << endl;
-        // cout << "max_pool.height=" << max_pool.height << "; max_pool.width=" << max_pool.width << endl;
         for (int r = 0; r < max_pool.height; r++) {
             for (int c = 0; c < max_pool.width; c++) {
 
@@ -211,36 +206,95 @@ private:
                 if (tribe_leader.first == -1) continue; 
 
                 // collect all life in matrix starting with the coordinates of this tribe leader
-                vector<Member> life_in_leader_matrix; 
+                Tribe newTribe; 
                 for (int tr = tribe_leader.first; tr < tribe_leader.first + CONV_MATRIX_SIZE; tr++) {
                     for (int tc = tribe_leader.second; tc < tribe_leader.second + CONV_MATRIX_SIZE; tc++) {
+                        
                         if (grid[tr * N + tc] > 0) {
                             Member p = pair<int, int>(tr, tc);
-                            if (isMemberInTribes(p) != -1) continue; // already a member of some tribe
+
+                            // if already a member of some tribe
+                            if (getTribeMembership(p) != -1) continue; 
+
+                            // if already collected
+                            if (isInTribe(p, newTribe)) continue; 
+
+                            // find all neighbors within range using BFS
+                            vector<Member> valid_neighbors = BFS(p, newTribe);
+                            
+                            // the group looks for a nearby tribe to settle down
                             int nearbyT = searchNearbyTribe(p);
-                            if (nearbyT == -1) // if there's no tribe nearby
-                                life_in_leader_matrix.push_back(p);
-                            else // found nearby existing tribe, add this life to the tribe found
-                                tribes[nearbyT].push_back(p);
+                            if (nearbyT == -1)  // if there's no tribe nearby
+                            {
+                                newTribe.insert(newTribe.end(), valid_neighbors.begin(), valid_neighbors.end());
+                                for (auto n : valid_neighbors) 
+                                    map[n.first * N + n.second] = tribes.size();
+                            }
+                            else                // found nearby existing tribe, add this group of lives to the tribe found
+                            {               
+                                tribes[nearbyT].insert(newTribe.end(), valid_neighbors.begin(), valid_neighbors.end());
+                                for (auto n : valid_neighbors) 
+                                    map[n.first * N + n.second] = nearbyT;
+                            }
                         }
                     }
                 }
-                if (life_in_leader_matrix.size() >= TRIBE_MIN_POPULATION) 
-                    // qualified to establish a new tribe
-                    tribes.push_back(life_in_leader_matrix);
+                register_new_tribe(newTribe);
             }
         }
     }
 
     /* Find all members of each tribe using BFS */
-    void map_tribes() {}
+    vector<Member> BFS(Member seed, Tribe newTribe) {
+        // initialize queue
+        vector<Member> queue;
+        queue.push_back(seed);
+        vector<Member> visited = newTribe;
+        vector<Member> new_neighbors = {seed};
+
+        //find neighbors
+        int radius = range/2;
+        while (!queue.empty())
+        {
+            Member p = queue.front();
+            if (!isInTribe(p, visited)) {
+                visited.push_back(p);
+                if (!isInTribe(p, new_neighbors)) new_neighbors.push_back(p);
+                for (int r = p.first - radius; r <= p.first + radius; r++) {
+                    for (int c = p.second - radius; c <= p.second + radius; c++) {
+                        if (r == p.first && c == p.second) continue;                           // neighbor is p itself
+                        bool withinBound = (0 <= r && r < M) && (0 <= c && c < N);
+                        if (!withinBound) continue;                                            // neighbor is out of bound
+                        if (grid[r*N+c] == 0) continue;                                        // neighbor is not alive
+
+                        Member neighbor = pair<int,int>(r,c);
+                        if (getTribeMembership(neighbor) != -1) continue;                      // neighbor is in other tribe
+                        else if (isInTribe(neighbor, visited)) continue;                       // neighbor is already visited
+                        else if (isInTribe(neighbor, queue)) continue;                         // neighbor is already in queue
+
+                        float delta_r = abs(neighbor.first - p.first);
+                        float delta_c = abs(neighbor.second - p.second);
+                        if (delta_c * delta_c + delta_r * delta_r > radius * radius) continue; // neighbor is too far: distance > radius
+                        
+                        queue.push_back(neighbor);
+                    }
+                }
+            }
+            queue.erase(queue.begin());
+        }
+        return new_neighbors;
+    }
 
 
 
 public:
 
     Map(int M, int N, int range, vector<int> grid) : 
-        M(M), N(N), range(range), grid(grid) {}
+        M(M), N(N), range(range), grid(grid)
+    {
+        vector<int> empty(grid.size(), -1); 
+        map = empty;
+    }
 
     vector<Tribe> get_tribes() 
     {   
