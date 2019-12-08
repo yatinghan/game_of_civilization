@@ -136,11 +136,6 @@ private:
         return shortest_dist;
     }
 
-    /* 
-     * Approximate tribe centers using convolution and max-pooling
-     * For each center, add all members within range to the tribe in tribes vector
-     */ 
-
     int getTribeMembership(Member p)
     {
         // p coordinates out of bound
@@ -202,6 +197,10 @@ private:
         }
     }
 
+    /* 
+     * Approximate tribe centers using convolution and max-pooling
+     * For each center, add all members within range to the tribe in tribes vector
+     */ 
     void init_tribes() 
     {
         auto conv = this->convolution();
