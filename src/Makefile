@@ -6,3 +6,6 @@ cuda: gameOfCivilization.h gameOfCivilizationCuda.h gameOfCivilizationCuda.cu cu
 
 seq : gameOfCivilization.h gameOfCivilizationSequential.h gameOfCivilizationSequential.cpp main.cpp
 	g++ -std=c++14 -m64 -O3 -g -o seqGame gameOfCivilization.h gameOfCivilizationSequential.h gameOfCivilizationSequential.cpp main.cpp
+
+seqN : gameOfCivilization.h gameOfCivilizationSequential_with_Nations.h gameOfCivilizationSequential_with_Nations.cpp main_with_Nations.cpp
+	g++ -std=c++14 -m64 -O3 -g -o seqGamewNation gameOfCivilization.h gameOfCivilizationSequential_with_Nations.h gameOfCivilizationSequential_with_Nations.cpp main_with_Nations.cpp
