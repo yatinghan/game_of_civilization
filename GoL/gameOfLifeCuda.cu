@@ -22,6 +22,7 @@
 #define BLOCK_WIDTH 32
 #define BLOCK_HEIGHT 32
 #define BLOCK_SIZE 1024
+#define PIXEL_PER_THREAD 4
 #define IDX(X, Y) ((X) * width + (Y))
 
 using namespace std;
@@ -40,11 +41,6 @@ struct GlobalConstants {
 
 };
 
-// Global variable that is in scope, but read-only, for all cuda
-// kernels.  The __constant__ modifier designates this variable will
-// be stored in special "constant" memory on the GPU. (we didn't talk
-// about this type of memory in class, but constant memory is a fast
-// place to put read-only variables).
 __constant__ GlobalConstants cuConstRendererParams;
 
 
@@ -117,7 +113,6 @@ CudaGame::setup() {
     cudaMalloc(&cudaDeviceFuture, sizeof(int) * width * height);
 
     cudaMemcpy(cudaDeviceGrid, &grid[0], sizeof(int) * width * height, cudaMemcpyHostToDevice);
-    //cudaMemcpy(cudaDeviceFuture, &future[0], sizeof(int) * width * height, cudaMemcpyHostToDevice);
 
 
     // Initialize parameters in constant memory.  We didn't talk about
@@ -140,7 +135,7 @@ CudaGame::setup() {
 
 void 
 CudaGame::printGrid() {
-    cudaMemcpy(&(this->future[0]),
+    cudaMemcpy(&(this->grid[0]),
                cudaDeviceFuture,
                sizeof(int) * width * height,
                cudaMemcpyDeviceToHost);
@@ -160,81 +155,69 @@ CudaGame::printGrid() {
 
 __global__ 
 void kernelAdvanceGame() {
-    
-    //row?
-    int l = blockIdx.x * blockDim.x + threadIdx.x;
-    //col?
-    int m = blockIdx.y * blockDim.y + threadIdx.y;
+
+    int start_idx = (blockIdx.x * blockDim.x + threadIdx.x) * PIXEL_PER_THREAD;
     int w = cuConstRendererParams.width;
-    int width = cuConstRendererParams.width;
     int h = cuConstRendererParams.height;
+    int width = w;
 
-    if (l > 0 && l < h-1 && m > 0 && m < w-1 ) {
+    for (int idx = start_idx; idx < start_idx+PIXEL_PER_THREAD && idx < w*h; idx++) {
+        int l = idx / h; //row ?
+        int m = idx % h; //col ?
+        if (l > 0 && l < h-1 && m > 0 && m < w-1) {
 
-        // finding no Of Neighbours that are alive 
-        int aliveNeighbours = 0; 
-        for (int i = -1; i <= 1; i++) 
-            for (int j = -1; j <= 1; j++) 
-                aliveNeighbours += (cuConstRendererParams.grid[IDX(l + i, m + j)] > 0); 
+            // finding no Of Neighbours that are alive 
+            int aliveNeighbours = 0; 
+            for (int i = -1; i <= 1; i++) 
+                for (int j = -1; j <= 1; j++) 
+                    aliveNeighbours += (cuConstRendererParams.grid[IDX(l + i, m + j)] > 0); 
 
-        // The cell needs to be subtracted from 
-        // its neighbours as it was counted before 
-        if (cuConstRendererParams.grid[IDX(l, m)] > 0) 
-            cuConstRendererParams.grid[IDX(l, m)] = 1;
+            // The cell needs to be subtracted from 
+            // its neighbours as it was counted before 
+            if (cuConstRendererParams.grid[IDX(l, m)] > 0) 
+                cuConstRendererParams.grid[IDX(l, m)] = 1;
 
-        __syncthreads();
+            __syncthreads();
 
-        aliveNeighbours -= cuConstRendererParams.grid[IDX(l, m)]; 
+            aliveNeighbours -= cuConstRendererParams.grid[IDX(l, m)]; 
 
-        // Implementing the Rules of Life 
+            // Implementing the Rules of Life 
 
-        // Cell is lonely and dies 
-        if ((cuConstRendererParams.grid[IDX(l, m)] == 1) && (aliveNeighbours < 2)) 
-            cuConstRendererParams.future[IDX(l, m)] = 0; 
+            // Cell is lonely and dies 
+            if ((cuConstRendererParams.grid[IDX(l, m)] == 1) && (aliveNeighbours < 2)) 
+                cuConstRendererParams.future[IDX(l, m)] = 0; 
 
-        // Cell dies due to over population 
-        else if ((cuConstRendererParams.grid[IDX(l, m)] == 1) && (aliveNeighbours > 3)) 
-            cuConstRendererParams.future[IDX(l, m)] = 0; 
+            // Cell dies due to over population 
+            else if ((cuConstRendererParams.grid[IDX(l, m)] == 1) && (aliveNeighbours > 3)) 
+                cuConstRendererParams.future[IDX(l, m)] = 0; 
 
-        // A new cell is born 
-        else if ((cuConstRendererParams.grid[IDX(l, m)] == 0) && (aliveNeighbours == 3)) {
-            cuConstRendererParams.future[IDX(l, m)] = 1; 
+            // A new cell is born 
+            else if ((cuConstRendererParams.grid[IDX(l, m)] == 0) && (aliveNeighbours == 3)) {
+                cuConstRendererParams.future[IDX(l, m)] = 1; 
+            }
+                
+            // Remains the same 
+            else
+                cuConstRendererParams.future[IDX(l, m)] = cuConstRendererParams.grid[IDX(l, m)]; 
         }
-            
-        // Remains the same 
-        else
-            cuConstRendererParams.future[IDX(l, m)] = cuConstRendererParams.grid[IDX(l, m)]; 
-        
-
-
     }
+    
 }
 
 __global__ 
 void kernelSwap() {
-    //row?
-    int l = blockIdx.x * blockDim.x + threadIdx.x;
-    //col?
-    int m = blockIdx.y * blockDim.y + threadIdx.y;
-    int w = cuConstRendererParams.width;
-    int width = cuConstRendererParams.width;
-    int h = cuConstRendererParams.height;
-
-    if ((l < h && m < w))
-        // copy future to grid so that we don't have to re-copy
-        cuConstRendererParams.grid[IDX(l, m)] = cuConstRendererParams.future[IDX(l, m)]; 
+    int start_idx = (blockIdx.x * blockDim.x + threadIdx.x) * (PIXEL_PER_THREAD );
+    int dim = cuConstRendererParams.width * cuConstRendererParams.height;
+    for (int idx = start_idx; idx < start_idx+PIXEL_PER_THREAD && idx < dim; idx++) {
+            cuConstRendererParams.grid[idx] = cuConstRendererParams.future[idx]; 
+    } 
 }
 
 void
 CudaGame::advanceGame() {
-    
-    dim3 blockDim(BLOCK_HEIGHT, BLOCK_WIDTH);
-    dim3 gridDim((this->height+blockDim.x-1)/ blockDim.x,
-                 (this->width+blockDim.y-1) / blockDim.y);
-    // printf("grid dim: %d : %d\n", gridDim.x, gridDim.y);m
-                
+    dim3 blockDim(BLOCK_SIZE);
+    int dim = this->height*this->width;
+    dim3 gridDim((dim / PIXEL_PER_THREAD + blockDim.x-1) / blockDim.x);
     kernelAdvanceGame<<<gridDim, blockDim>>>();
-
     kernelSwap<<<gridDim, blockDim>>>();
-    
 }

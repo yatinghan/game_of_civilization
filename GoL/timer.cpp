@@ -55,7 +55,7 @@ int main(int argc,char* argv[]) {
         seq_renderer->advanceGame();
         double simulateStepTime = t.elapsed();
         totalSeqTime += simulateStepTime;
-        if (printseq && i > 40) {
+        if (printseq) {
             cout << "Next Generation" << endl; 
             seq_renderer->printGrid();
         }
@@ -77,9 +77,9 @@ int main(int argc,char* argv[]) {
         }
     }
 
-    printf("Total simulation time for sequential version: %.6fms\n", totalSeqTime);
-    printf("Total simulation time for CUDA version: %.6fms\n", totalCudaTime);
-    printf("Average speedup: %.6fms\n", totalSeqTime / totalCudaTime);
+    printf("Total simulation time for sequential version: %.6fms\n", totalSeqTime*1000.0f);
+    printf("Total simulation time for CUDA version: %.6fms\n", totalCudaTime*1000.0f);
+    printf("Average speedup: %.6f\n", totalSeqTime / totalCudaTime);
 
     return 0;
 }
