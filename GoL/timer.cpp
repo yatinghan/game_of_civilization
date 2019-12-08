@@ -79,6 +79,7 @@ int main(int argc,char* argv[]) {
 
     printf("Total simulation time for sequential version: %.6fms\n", totalSeqTime);
     printf("Total simulation time for CUDA version: %.6fms\n", totalCudaTime);
+    printf("Average speedup: %.6fms\n", totalSeqTime / totalCudaTime);
 
     return 0;
 }
