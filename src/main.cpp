@@ -9,7 +9,7 @@ int main() {
         seq_renderer->advanceGame();
         cout << "Generation "  << i+1 << endl; 
         seq_renderer->printGrid();
-        usleep(300000);
+        usleep(200000);
     }
     return 0;
 }

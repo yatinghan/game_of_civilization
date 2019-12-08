@@ -2,6 +2,7 @@
 #define __GAME_OF_CIVILIZATION_SEQUENTIAL_H__
 
 #include "gameOfCivilization.h"
+#include "Area_Division.cpp"
 
 #include <vector>
 #include <iostream>
@@ -15,6 +16,7 @@ private:
     int height;
     std::vector<int> grid;
     std::vector<int> future;
+    History history;
 
 public:
 

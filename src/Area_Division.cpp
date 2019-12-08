@@ -6,17 +6,40 @@
 #include <assert.h>
 
 #define CONV_MATRIX_SIZE 10
-#define MAX_POOL_SIZE 4
+#define MAX_POOL_SIZE 10
 #define TRIBE_MIN_POPULATION 15
+#define NATION_MIN_POPULATION 30
+
+#define RESET   "\033[0m"
+#define BOLDBLACK   "\033[1m\033[40m"      /* Bold Black */
+#define BOLDRED     "\033[1m\033[41m"      /* Bold Red */
+#define BOLDGREEN   "\033[1m\033[42m"      /* Bold Green */
+#define BOLDYELLOW  "\033[1m\033[43m"      /* Bold Yellow */
+#define BOLDBLUE    "\033[1m\033[44m"      /* Bold Blue */
+#define BOLDMAGENTA "\033[1m\033[45m"      /* Bold Magenta */
+#define BOLDCYAN    "\033[1m\033[46m"      /* Bold Cyan */
+#define BOLDWHITE   "\033[1m\033[47m"      /* Bold White */
 
 using namespace std;
 typedef pair<int, int> Member; // pair<row, column>
+typedef pair<int, int> Point; // pair<row, column>
 typedef vector<Member> Tribe; 
 
 template <typename T>
 struct Matrix {
     vector<T> matrix;
     int height, width;
+};
+
+struct Nation {
+    string color;
+    vector<Point> land;
+    vector<Member> people;
+};
+
+struct History {
+    std::vector<int> map; // only the territory of the nations are painted on the map
+    vector<Nation> nations;
 };
 
 class Map {
@@ -27,6 +50,7 @@ private:
     const int M, N; // M = grid height; N = grid width
     const int range;
     vector<Tribe> tribes;
+    vector<Nation> nations;
     vector<int> map; // the map records the citizenship of life on every coordinate
 
     void printIntMatrix(Matrix<int> mat)
@@ -298,6 +322,8 @@ private:
 
 public:
 
+    vector<string> colors = {BOLDYELLOW, BOLDGREEN, BOLDBLUE, BOLDRED, BOLDMAGENTA, BOLDCYAN, BOLDBLACK, BOLDWHITE};
+
     Map(int M, int N, int range, vector<int> grid) : 
         M(M), N(N), range(range), grid(grid)
     {
@@ -309,15 +335,25 @@ public:
     {   
         tribes.clear();
         this->init_tribes();
-        // int count = 0;
-        // for (auto t : tribes) {
-        //     cout << "Tribe " << count << ": ";
-        //     for (auto l : t) cout << "(" << l.first << "," << l.second << ")  ";
-        //     cout << endl;
-        //     count++;
-        // }
+        int count = 0;
+        for (auto t : tribes) {
+            cout << "Tribe " << count << ": " << t.size() << endl;
+            // for (auto l : t) cout << "(" << l.first << "," << l.second << ")  ";
+            // cout << endl;
+            count++;
+        }
         // cout << tribes.size() << " tribes in total" << endl;
         return tribes;
+    }
+
+    vector<Nation> get_nations()
+    {
+
+    }
+
+    vector<int> get_map()
+    {
+
     }
 
 };
