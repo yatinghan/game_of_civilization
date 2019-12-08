@@ -71,7 +71,7 @@ SequentialGame::SequentialGame(int W, int H, std::string filename) {
 void
 SequentialGame::printGrid() {
     
-    Map map = Map(this->height, this->width, 10, this->grid);
+    Map map = Map(this->height, this->width, 4, this->grid);
     auto tribes = map.get_tribes();
     int tribe_index = 2;
     for (auto t : tribes) {
@@ -88,9 +88,9 @@ SequentialGame::printGrid() {
             else if (this->grid[IDX(i, j)] == 1)
                 cout << "* "; 
             else 
-                cout << colors[(this->grid[IDX(i, j)]-2)%8] << this->grid[IDX(i, j)] << " " << RESET;
+                cout << colors[(this->grid[IDX(i, j)]-2)%8] << "* " << RESET;
         } 
-        cout << endl; 
+        cout << RESET << endl; 
     } 
 }
 

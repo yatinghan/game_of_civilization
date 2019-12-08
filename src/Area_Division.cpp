@@ -4,9 +4,9 @@
 #include <vector>
 #include <math.h>
 
-#define CONV_MATRIX_SIZE 8
-#define MAX_POOL_SIZE 3
-#define TRIBE_MIN_POPULATION 10
+#define CONV_MATRIX_SIZE 10
+#define MAX_POOL_SIZE 4
+#define TRIBE_MIN_POPULATION 15
 
 using namespace std;
 typedef pair<int, int> Member; // pair<row, column>
@@ -26,6 +26,41 @@ private:
     const int M, N; // M = grid height; N = grid width
     const int range;
     vector<Tribe> tribes;
+
+    void printIntMatrix(Matrix<int> mat)
+    {
+        for (int i = 0; i < mat.height; i++) 
+        { 
+            for (int j = 0; j < mat.width; j++) 
+            { 
+                int pop = mat.matrix[i * mat.width + j];
+                if (pop < 10) 
+                    cout << pop << " "; 
+                else 
+                    cout << pop;
+            } 
+            cout << endl; 
+        } 
+    }
+
+    void printMemberMatrix(Matrix<Member> mat, Matrix<int> value)
+    {
+        for (int i = 0; i < mat.height; i++) 
+        { 
+            for (int j = 0; j < mat.width; j++) 
+            { 
+                Member leader = mat.matrix[i * mat.width + j];
+                int pop;
+                if (leader.first == -1) pop = 0;
+                else pop = value.matrix[leader.first * value.width + leader.second];
+                if (pop < 10) 
+                    cout << pop << " "; 
+                else 
+                    cout << pop;
+            } 
+            cout << endl; 
+        } 
+    }
 
     Matrix<int> convolution() 
     {
@@ -66,8 +101,8 @@ private:
                 Member max_coord;
                 for (int mat_r = 0; mat_r < MAX_POOL_SIZE; mat_r ++) {
                     for (int mat_c = 0; mat_c < MAX_POOL_SIZE; mat_c++) {
-                        int cur = input_matrix[(grid_r + mat_r) * N + (grid_c + mat_c)];
-                        if (cur > max) {
+                        int cur = input_matrix[(grid_r + mat_r) * input_w + (grid_c + mat_c)];
+                        if (cur >= max) {
                             max = cur;
                             max_coord = pair<int, int>(grid_r + mat_r, grid_c + mat_c);
                         }
@@ -104,34 +139,68 @@ private:
      * For each center, add all members within range to the tribe in tribes vector
      */ 
 
-    bool isMemberInTribes(Member p)
+    int isMemberInTribes(Member p)
     {
-        for (auto t : tribes) {
-            for (auto m : t) {
-                if (m.first == p.first && m.second == p.second) return true;
-            }
-        }
-        return false;
-    }
+        // p coordinates out of bound
+        bool withinBound = (0 <= p.first && p.first < M) && (0 <= p.second && p.second < N);
+        if (!withinBound) return -1;
 
-    int searchNearbyTribe(Member p)
-    {
-        for (int i = 0; i < tribes.size(); i++) {
-            for (auto m : tribes[i]) {
-                if (abs(m.first - p.first) <= 1 && abs(m.second < p.second) <= 1) {
-                    // cout << "Member (" << p.first << "," << p.second << ")";
-                    // cout << "found nearby tribe resident (" << m.first << "," << m.second << ")" << endl;
-                    return i;
-                }
+        // p is not alive
+        if (grid[p.first*N+p.second] == 0) return -1;
+
+        // search p's citizenship
+        for (int t = 0; t < tribes.size(); t++) {
+            for (auto m : tribes[t]) {
+                if (m.first == p.first && m.second == p.second) return t;
             }
         }
         return -1;
     }
 
+    int searchNearbyTribe(Member p)
+    {
+        int radius = range/2;
+        for (int r = p.first - radius; r <= p.first + radius; r++) {
+            for (int c = p.second - radius; c <= p.second + radius; c++) {
+                Member neighbor = pair<int,int>(r,c);
+                float delta_r = abs(neighbor.first - p.first);
+                float delta_c = abs(neighbor.second - p.second);
+                if (delta_c * delta_c + delta_r * delta_r > radius * radius) continue; // distance > radius
+                int t = isMemberInTribes(neighbor);
+                if (t != -1) return t;
+            }
+        }
+        return -1;
+    }
+
+    // int searchNearbyTribe(Member p)
+    // {
+    //     for (int i = 0; i < tribes.size(); i++) {
+    //         for (auto m : tribes[i]) {
+    //             if (abs(p.first - m.first) <= 4 && abs(p.second - m.second) <= 4) {
+    //                 // cout << "Member (" << p.first << "," << p.second << ")";
+    //                 // cout << "found nearby tribe resident (" << m.first << "," << m.second << ")" << endl;
+    //                 return i;
+    //             }
+    //         }
+    //     }
+    //     return -1;
+    // }
+
     void init_tribes() 
     {
         auto conv = this->convolution();
+        // printIntMatrix(conv);
         auto max_pool = this->max_pooling(conv.matrix, conv.height, conv.width);
+        // cout << "\n\n" << endl;
+        // printMemberMatrix(max_pool, conv);
+        // cout << "\n\n" << endl;
+        // cout << "conv.height=" << conv.height << "; conv.width=" << conv.width << endl;
+        // Member lastLeader = max_pool.matrix[max_pool.matrix.size()-1];
+        // cout << "leader at last max_pool matrix:" <<  lastLeader.first << "," << lastLeader.second << endl;
+        // cout << "population at last conv matrix:" <<  conv.matrix[42* conv.width + 42] << endl;
+        // cout << "population at this matrix:" <<  conv.matrix[lastLeader.first* conv.width + lastLeader.second] << endl;
+        // cout << "max_pool.height=" << max_pool.height << "; max_pool.width=" << max_pool.width << endl;
         for (int r = 0; r < max_pool.height; r++) {
             for (int c = 0; c < max_pool.width; c++) {
 
@@ -147,9 +216,9 @@ private:
                     for (int tc = tribe_leader.second; tc < tribe_leader.second + CONV_MATRIX_SIZE; tc++) {
                         if (grid[tr * N + tc] > 0) {
                             Member p = pair<int, int>(tr, tc);
-                            if (isMemberInTribes(p)) continue; // already a member of some tribe
+                            if (isMemberInTribes(p) != -1) continue; // already a member of some tribe
                             int nearbyT = searchNearbyTribe(p);
-                            if (nearbyT == -1) // if this life does not belong to any existing tribes
+                            if (nearbyT == -1) // if there's no tribe nearby
                                 life_in_leader_matrix.push_back(p);
                             else // found nearby existing tribe, add this life to the tribe found
                                 tribes[nearbyT].push_back(p);
@@ -177,14 +246,14 @@ public:
     {   
         tribes.clear();
         this->init_tribes();
-        int count = 0;
-        for (auto t : tribes) {
-            cout << "Tribe " << count << ": ";
-            for (auto l : t) cout << "(" << l.first << "," << l.second << ")  ";
-            cout << endl;
-            count++;
-        }
-        cout << tribes.size() << " tribes in total" << endl;
+        // int count = 0;
+        // for (auto t : tribes) {
+        //     cout << "Tribe " << count << ": ";
+        //     for (auto l : t) cout << "(" << l.first << "," << l.second << ")  ";
+        //     cout << endl;
+        //     count++;
+        // }
+        // cout << tribes.size() << " tribes in total" << endl;
         return tribes;
     }
 
