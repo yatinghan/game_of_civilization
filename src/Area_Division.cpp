@@ -162,20 +162,30 @@ private:
         return false;
     }
 
-    int searchNearbyTribe(Member p)
+    int searchNearbyTribe(vector<Member> group_of_wanderers)
     {
         int radius = range/2;
-        for (int r = p.first - radius; r <= p.first + radius; r++) {
-            for (int c = p.second - radius; c <= p.second + radius; c++) {
-                Member neighbor = pair<int,int>(r,c);
-                float delta_r = abs(neighbor.first - p.first);
-                float delta_c = abs(neighbor.second - p.second);
-                if (delta_c * delta_c + delta_r * delta_r > radius * radius) continue; // distance > radius
-                int t = getTribeMembership(neighbor);
-                if (t != -1) return t;
+        float shortest_distance = INFINITY;
+        int closest_tribe = -1;
+        for (auto p: group_of_wanderers) {
+            for (int r = p.first - radius; r <= p.first + radius; r++) {
+                for (int c = p.second - radius; c <= p.second + radius; c++) {
+                    Member neighbor = pair<int,int>(r,c);
+                    float delta_r = abs(neighbor.first - p.first);
+                    float delta_c = abs(neighbor.second - p.second);
+                    if (delta_c * delta_c + delta_r * delta_r > radius * radius) continue; // distance > radius
+                    int t = getTribeMembership(neighbor);
+                    if (t != -1) {
+                        float d = distance_to_tribe(p, t);
+                        if (d < shortest_distance) {
+                            shortest_distance = d;
+                            closest_tribe = t;
+                        }
+                    }
+                }
             }
         }
-        return -1;
+        return closest_tribe;
     }
 
     void register_new_tribe(Tribe newTribe)
@@ -223,7 +233,7 @@ private:
                             vector<Member> valid_neighbors = BFS(p, newTribe);
                             
                             // the group looks for a nearby tribe to settle down
-                            int nearbyT = searchNearbyTribe(p);
+                            int nearbyT = searchNearbyTribe(valid_neighbors);
                             if (nearbyT == -1)  // if there's no tribe nearby
                             {
                                 newTribe.insert(newTribe.end(), valid_neighbors.begin(), valid_neighbors.end());
