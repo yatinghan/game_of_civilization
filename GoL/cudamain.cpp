@@ -41,8 +41,13 @@ int main(int argc,char* argv[]) {
         return -1;
     }
 
+    // std::vector<int> grid;
+    // std::vector<int> future;
+    // grid.resize(width*height);
+    // future.resize(width*height);
     Game* cuda_renderer = new CudaGame(width, height, "config.txt");
-
+    cuda_renderer->setup();
+    
     double totalCudaTime = 0.0f;
     //cuda_renderer->printGrid();
     for (int i = 0; i < count; i++) {

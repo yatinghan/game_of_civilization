@@ -9,23 +9,25 @@
 
 class SequentialGame : public Game {
 
-private:
+public:
 
     int width;
     int height;
     std::vector<int> grid;
     std::vector<int> future;
 
-public:
+
+    SequentialGame(int width, int height);
 
     SequentialGame(int width, int height, std::string filename);
-    //virtual ~SequentialRenderer();
+
+    SequentialGame(int W, int H, std::string filename, std::vector<int>& grid2, std::vector<int>& future2);
+
+    void setup();
 
     void printGrid();
 
     void advanceGame();
-
-    //void render();
 
 
 };

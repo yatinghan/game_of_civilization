@@ -8,7 +8,6 @@
 #define CONV_MATRIX_SIZE 10
 #define MAX_POOL_SIZE 10
 #define TRIBE_MIN_POPULATION 15
-#define NATION_MIN_POPULATION 30
 
 #define RESET   "\033[0m"
 #define BOLDBLACK   "\033[1m\033[40m"      /* Bold Black */
@@ -31,27 +30,9 @@ struct Matrix {
     int height, width;
 };
 
-struct Nation {
-    string color;
-    vector<Point> land;
-    vector<Member> people;
-};
-
-struct History {
-    std::vector<int> map; // only the territory of the nations are painted on the map
-    vector<Nation> nations;
-};
-
 class Map {
 
 private:
-
-    vector<int> grid;
-    const int M, N; // M = grid height; N = grid width
-    const int range;
-    vector<Tribe> tribes;
-    vector<Nation> nations;
-    vector<int> map; // the map records the citizenship of life on every coordinate
 
     void printIntMatrix(Matrix<int> mat)
     {
@@ -96,7 +77,6 @@ private:
         
         for (int grid_r = 0; grid_r < conv_result_height; grid_r++) {
             for (int grid_c = 0; grid_c < conv_result_width; grid_c++) {
-
                 int total = 0;
                 for (int mat_r = 0; mat_r < CONV_MATRIX_SIZE; mat_r ++) {
                     for (int mat_c = 0; mat_c < CONV_MATRIX_SIZE; mat_c++) {
@@ -122,7 +102,6 @@ private:
         
         for (int grid_r = 0; grid_r < pool_result_height; grid_r++) {
             for (int grid_c = 0; grid_c < pool_result_width; grid_c++) {
-
                 int max = 0;
                 Member max_coord;
                 for (int mat_r = 0; mat_r < MAX_POOL_SIZE; mat_r ++) {
@@ -209,6 +188,7 @@ private:
 
     void register_new_tribe(Tribe newTribe)
     {
+        
         if (newTribe.size() >= TRIBE_MIN_POPULATION) {
             // qualified to establish a new tribe
             int tribe_index = tribes.size();
@@ -327,6 +307,13 @@ private:
 
 public:
 
+    vector<int> grid;
+    const int M, N; // M = grid height; N = grid width
+    const int range;
+    vector<Tribe> tribes;
+    vector<int> map; // the map records the citizenship of life on every coordinate
+
+
     vector<string> colors = {BOLDYELLOW, BOLDGREEN, BOLDBLUE, BOLDRED, BOLDMAGENTA, BOLDCYAN, BOLDBLACK, BOLDWHITE};
 
     Map(int M, int N, int range, vector<int> grid) : 
@@ -343,22 +330,8 @@ public:
         int count = 0;
         for (auto t : tribes) {
             cout << "Tribe " << count << ": " << t.size() << endl;
-            // for (auto l : t) cout << "(" << l.first << "," << l.second << ")  ";
-            // cout << endl;
             count++;
         }
-        // cout << tribes.size() << " tribes in total" << endl;
         return tribes;
     }
-
-    vector<Nation> get_nations()
-    {
-
-    }
-
-    vector<int> get_map()
-    {
-
-    }
-
 };

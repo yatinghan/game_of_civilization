@@ -46,6 +46,21 @@ __constant__ GlobalConstants cuConstRendererParams;
 
 ////////////////////////////////////////////////////////////////////////////////////////
 
+CudaGame::CudaGame(int W, int H) {
+    this->width = W;
+    int width = W;
+    this->height = H;
+    
+    this->grid.resize(W*H);
+    std::fill(this->grid.begin(), this->grid.end(), 0);
+    this->future.resize(W*H);
+    for (int i = 0; i < H; i++) {
+        for (int j = 0; j < W; j++) 
+            if (i % 15 < 10 && j % 15 == 10) this->grid[IDX(i, j)] = true;
+            // if (i % 5 < 3 && j % 4 == 3) this->grid[IDX(i, j)] = true;
+    }
+    setup();
+}
 
 CudaGame::CudaGame(int W, int H, std::string filename) {
     this->width = W;
@@ -71,13 +86,41 @@ CudaGame::CudaGame(int W, int H, std::string filename) {
             y = stoi(yy);
             this->grid[IDX(x, y)] = true;
         }
-        setup();
+        //setup();
     } 
     else {
         cout << "No such file, try again." << endl;
     }
 }
 
+// CudaGame::CudaGame(int W, int H, std::string filename, std::vector<int> grid2, std::vector<int> future2) {
+//     this->width = W;
+//     this->height = H;
+//     this->grid = grid2;
+//     this->future = future2;
+//     //this->future.resize(W*H);
+//     //std::fill(this->future.begin(), this->future.end(), 0);
+
+//     ifstream readfile(filename);
+//     if ( readfile.is_open() )
+//     {
+//         string fileline,xx,yy;
+//         int x, y;
+
+//         while (getline(readfile,fileline))
+//         {
+//             stringstream ss(fileline);
+//             getline(ss,xx,' ');
+//             getline(ss,yy,' ');
+//             x = stoi(xx);
+//             y = stoi(yy);
+//             this->grid[IDX(x, y)] = true;
+//         }
+//     }
+//     else {
+//         cout << "No such file, try again." << endl;
+//     }
+// }
 
 void
 CudaGame::setup() {
@@ -139,7 +182,7 @@ CudaGame::printGrid() {
                cudaDeviceFuture,
                sizeof(int) * width * height,
                cudaMemcpyDeviceToHost);
-    swap(grid, future);
+    //swap(grid, future);
     for (int i = 0; i < this->width; i++) 
     { 
         for (int j = 0; j < this->height; j++) 
@@ -215,9 +258,18 @@ void kernelSwap() {
 
 void
 CudaGame::advanceGame() {
+
     dim3 blockDim(BLOCK_SIZE);
     int dim = this->height*this->width;
     dim3 gridDim((dim / PIXEL_PER_THREAD + blockDim.x-1) / blockDim.x);
     kernelAdvanceGame<<<gridDim, blockDim>>>();
     kernelSwap<<<gridDim, blockDim>>>();
+}
+
+void
+CudaGame::prepPrint() {
+    cudaMemcpy(&(this->grid[0]),
+    this->cudaDeviceFuture,
+    sizeof(int) * width * height,
+    cudaMemcpyDeviceToHost);
 }
