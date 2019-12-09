@@ -24,7 +24,6 @@ SequentialGame::SequentialGame(int W, int H, std::string filename) {
     this->grid.resize(W*H);
     std::fill(this->grid.begin(), this->grid.end(), 0);
     this->future.resize(W*H);
-    //std::fill(this->future.begin(), this->future.end(), 0);
 
     ifstream readfile(filename);
     if ( readfile.is_open() )

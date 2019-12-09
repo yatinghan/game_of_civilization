@@ -16,15 +16,13 @@ public:
     std::vector<int> grid;
     std::vector<int> future;
 
+    SequentialGame(int width, int height);
+
     SequentialGame(int width, int height, std::string filename);
-    //virtual ~SequentialRenderer();
 
     void printGrid();
 
     void advanceGame();
-
-    //void render();
-
 
 };
 

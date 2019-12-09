@@ -16,7 +16,6 @@ private:
     int height;
     std::vector<int> grid;
     std::vector<int> future;
-    History history;
 
 public:
 

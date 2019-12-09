@@ -46,6 +46,20 @@ __constant__ GlobalConstants cuConstRendererParams;
 
 ////////////////////////////////////////////////////////////////////////////////////////
 
+CudaGame::CudaGame(int W, int H) {
+    this->width = W;
+    int width = W;
+    this->height = H;
+    
+    this->grid.resize(W*H);
+    std::fill(this->grid.begin(), this->grid.end(), 0);
+    this->future.resize(W*H);
+    for (int i = 0; i < H; i++) {
+        for (int j = 0; j < W; j++) 
+            if (i % 5 < 3 && j % 4 == 3) this->grid[IDX(i, j)] = true;
+    }
+    setup();
+}
 
 CudaGame::CudaGame(int W, int H, std::string filename) {
     this->width = W;

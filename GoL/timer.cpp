@@ -46,6 +46,7 @@ int main(int argc,char* argv[]) {
     }
 
     Game* seq_renderer = new SequentialGame(width, height, "config.txt");
+    //Game* seq_renderer = new SequentialGame(width, height);
 
     double totalSeqTime = 0.0f;
     //seq_renderer->printGrid();
@@ -62,6 +63,7 @@ int main(int argc,char* argv[]) {
     }
 
     Game* cuda_renderer = new CudaGame(width, height, "config.txt");
+    //Game* cuda_renderer = new CudaGame(width, height);
 
     double totalCudaTime = 0.0f;
     //cuda_renderer->printGrid();
@@ -75,6 +77,9 @@ int main(int argc,char* argv[]) {
             cout << "Next Generation" << endl;
             cuda_renderer->printGrid();
         }
+
+        sleep(0.01);
+
     }
 
     printf("Total simulation time for sequential version: %.6fms\n", totalSeqTime*1000.0f);
