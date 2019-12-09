@@ -17,6 +17,7 @@
 
 using namespace std;
 
+
 SequentialGame::SequentialGame(int W, int H) {
     this->width = W;
     this->height = H;
@@ -26,7 +27,8 @@ SequentialGame::SequentialGame(int W, int H) {
 
     for (int i = 0; i < H; i++) {
         for (int j = 0; j < W; j++) 
-            if (i % 5 < 3 && j % 4 == 3) this->grid[IDX(i, j)] = true;
+            if (i % 15 < 10 && j % 15 == 10) this->grid[IDX(i, j)] = true;
+            //if (i % 5 < 3 && j % 4 == 3) this->grid[IDX(i, j)] = true;
     }
 }
 
@@ -58,6 +60,40 @@ SequentialGame::SequentialGame(int W, int H, std::string filename) {
     else {
         cout << "No such file, try again." << endl;
     }
+}
+
+// SequentialGame::SequentialGame(int W, int H, std::string filename, std::vector<int>& grid2, std::vector<int>& future2) {
+//     this->width = W;
+//     this->height = H;
+//     this->grid = grid2;
+//     this->future = future2;
+//     //this->future.resize(W*H);
+//     //std::fill(this->future.begin(), this->future.end(), 0);
+
+//     ifstream readfile(filename);
+//     if ( readfile.is_open() )
+//     {
+//         string fileline,xx,yy;
+//         int x, y;
+
+//         while (getline(readfile,fileline))
+//         {
+//             stringstream ss(fileline);
+//             getline(ss,xx,' ');
+//             getline(ss,yy,' ');
+//             x = stoi(xx);
+//             y = stoi(yy);
+//             this->grid[IDX(x, y)] = true;
+//         }
+//     }
+//     else {
+//         cout << "No such file, try again." << endl;
+//     }
+// }
+
+void
+SequentialGame::setup() {
+    return;
 }
 
 void

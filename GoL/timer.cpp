@@ -63,6 +63,7 @@ int main(int argc,char* argv[]) {
     }
 
     Game* cuda_renderer = new CudaGame(width, height, "config.txt");
+    cuda_renderer->setup();
     //Game* cuda_renderer = new CudaGame(width, height);
 
     double totalCudaTime = 0.0f;

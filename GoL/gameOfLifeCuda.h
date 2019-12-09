@@ -9,7 +9,8 @@
 
 class CudaGame : public Game {
 
-private:
+public:
+
     int width;
     int height;
     std::vector<int> grid;
@@ -19,22 +20,19 @@ private:
     int* cudaDeviceGrid;
     int* cudaDeviceFuture;
 
-public:
-
     CudaGame(int W, int H);
 
     CudaGame(int W, int H, std::string filename);
-    //virtual ~SequentialRenderer();
 
+    //CudaGame(int W, int H, std::string filename, std::vector<int> grid2, std::vector<int> future2);
+    
     void setup();
     
     void printGrid();
 
     void advanceGame();
 
-
-    //void render();
-
+    void prepPrint();
 
 };
 

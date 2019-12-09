@@ -4,7 +4,8 @@
 class Game {
 
 public:
-
+    virtual void setup() = 0;
+    
     virtual void printGrid() = 0;
 
     virtual void advanceGame() = 0;

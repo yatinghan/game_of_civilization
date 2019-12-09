@@ -41,6 +41,12 @@ int main(int argc,char* argv[]) {
         return -1;
     }
 
+
+    //Game* seq_renderer = new SequentialGame(width, height, "config.txt");
+    // std::vector<int> grid;
+    // std::vector<int> future;
+    // grid.resize(width*height);
+    // future.resize(width*height);
     Game* seq_renderer = new SequentialGame(width, height, "config.txt");
 
     double totalSeqTime = 0.0f;
