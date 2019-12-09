@@ -1,16 +1,16 @@
-#ifndef __GAME_OF_CIVILIZATION_SEQUENTIAL_H__
-#define __GAME_OF_CIVILIZATION_SEQUENTIAL_H__
+#ifndef __GAME_OF_CIVILIZATION_BASELINE_H__
+#define __GAME_OF_CIVILIZATION_BASELINE_H__
 
 
 #include "../GoL/gameOfLifeSequential.h"
 #include "gameOfCivilization.h"
-#include "AreaDivision.cpp"
+#include "AreaDivisionBFS.cpp"
 
 #include <vector>
 #include <iostream>
 #include <string>
 
-class SequentialGoC : public GoC {
+class BaselineGoC : public GoC {
 
 private:
 
@@ -23,9 +23,9 @@ public:
     SequentialGame* renderer;
     Map* map = NULL;
 
-    SequentialGoC(int width, int height);
+    BaselineGoC(int width, int height);
 
-    SequentialGoC(int width, int height, std::string filename);
+    BaselineGoC(int width, int height, std::string filename);
 
     //void setup();
 

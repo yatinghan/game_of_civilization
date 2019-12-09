@@ -1,4 +1,4 @@
-#include "gameOfCivilizationCuda.h"
+#include "gameOfCivilizationBaseline.h"
 #include "timing.h"
 #include <iostream>
 #include <unistd.h>
@@ -40,14 +40,11 @@ int main(int argc,char* argv[]) {
         return -1;
     }
 
-    CudaGoC* cuda_renderer = new CudaGoC(width, height);
-    //CudaGoC* cuda_renderer = new CudaGoC(width, height, "config.txt");
+    //BaselineGoC* cuda_renderer = new BaselineGoC(width, height, "config.txt");
+    BaselineGoC* cuda_renderer = new BaselineGoC(width, height);
 
     double totalCudaTime = 0.0f;
     double totalSimTime = 0.0f;
-    double convolutionTime = 0.0f;
-    double maxPoolingTime = 0.0f;
-    double searchNearbyTribeTime = 0.0f;
     double bfsTime = 0.0f;
     double initTime = 0.0f;
 
@@ -61,10 +58,7 @@ int main(int argc,char* argv[]) {
         totalCudaTime += t2.elapsed();
         cuda_renderer->render();
 
-        convolutionTime += cuda_renderer->map->convolutionTime;
-        maxPoolingTime += cuda_renderer->map->maxPoolingTime;
         bfsTime += cuda_renderer->map->bfsTime;
-        searchNearbyTribeTime += cuda_renderer->map->searchNearbyTribeTime;
         initTime += cuda_renderer->map->initTime;
 
         totalSimTime += t.elapsed();
@@ -75,13 +69,10 @@ int main(int argc,char* argv[]) {
         usleep(200000);
     }
     
-    printf("Convolution time: %.6fms\n", convolutionTime * 1000.0f);
-    printf("Max pooling time: %.6fms\n", maxPoolingTime * 1000.0f);
     printf("BFS time: %.6fms\n", bfsTime * 1000.0f);
-    printf("Search nearby neighbor time: %.6fms\n", searchNearbyTribeTime * 1000.0f);
     printf("Total classification time: %.6fms\n", initTime * 1000.0f);
     printf("Total GoL time: %.6fms\n", totalCudaTime * 1000.0f);
-    printf("Total simulation time for PARALLEL version: %.6fms\n", totalSimTime * 1000.0f);
+    printf("Total simulation time for BASELINE version: %.6fms\n", totalSimTime * 1000.0f);
 
     return 0;
 }

@@ -11,6 +11,7 @@
 #define CONV_MATRIX_SIZE 10
 #define MAX_POOL_SIZE 10
 #define TRIBE_MIN_POPULATION 15
+#define NATION_MIN_POPULATION 30
 
 #define RESET   "\033[0m"
 #define BOLDBLACK   "\033[1m\033[40m"      /* Bold Black */
@@ -33,10 +34,27 @@ struct Matrix {
     int height, width;
 };
 
+struct Nation {
+    string color;
+    vector<Point> land;
+    vector<Member> people;
+};
+
+struct History {
+    std::vector<int> map; // only the territory of the nations are painted on the map
+    vector<Nation> nations;
+};
+
 class Map {
 
 private:
 
+    vector<int> grid;
+    const int M, N; // M = grid height; N = grid width
+    const int range;
+    vector<Tribe> tribes;
+    vector<Nation> nations;
+    vector<int> map; // the map records the citizenship of life on every coordinate
 
     void printIntMatrix(Matrix<int> mat)
     {
@@ -74,18 +92,14 @@ private:
     }
 
     Matrix<int> convolution() 
-    {   
-        #ifdef DEBUG
-        Timer t;
-        t.reset();
-        #endif 
+    {
         int conv_result_height = M - CONV_MATRIX_SIZE + 1;
         int conv_result_width = N - CONV_MATRIX_SIZE + 1;
         vector<int> conv_result(conv_result_height * conv_result_width, 0); 
         
         for (int grid_r = 0; grid_r < conv_result_height; grid_r++) {
             for (int grid_c = 0; grid_c < conv_result_width; grid_c++) {
-                
+
                 int total = 0;
                 for (int mat_r = 0; mat_r < CONV_MATRIX_SIZE; mat_r ++) {
                     for (int mat_c = 0; mat_c < CONV_MATRIX_SIZE; mat_c++) {
@@ -100,25 +114,18 @@ private:
         result.matrix = conv_result;
         result.height = conv_result_height;
         result.width = conv_result_width;
-
-        #ifdef DEBUG
-        convolutionTime = t.elapsed();
-        #endif
         return result;
     }
 
     Matrix<Member> max_pooling(vector<int> input_matrix, int input_h, int input_w) 
     {
-        #ifdef DEBUG
-        Timer t;
-        t.reset();
-        #endif 
         int pool_result_height = input_h - MAX_POOL_SIZE + 1;
         int pool_result_width = input_w - MAX_POOL_SIZE + 1;
         vector<Member> pool_result(pool_result_height * pool_result_width, pair<int, int>(-1,-1)); 
         
         for (int grid_r = 0; grid_r < pool_result_height; grid_r++) {
             for (int grid_c = 0; grid_c < pool_result_width; grid_c++) {
+
                 int max = 0;
                 Member max_coord;
                 for (int mat_r = 0; mat_r < MAX_POOL_SIZE; mat_r ++) {
@@ -139,11 +146,6 @@ private:
         result.matrix = pool_result;
         result.height = pool_result_height;
         result.width = pool_result_width;
-
-        #ifdef DEBUG
-        maxPoolingTime = t.elapsed();
-        #endif
-
         return result;
     }
 
@@ -184,11 +186,6 @@ private:
 
     int searchNearbyTribe(vector<Member> group_of_wanderers)
     {
-        #ifdef DEBUG
-        Timer t;
-        t.reset();
-        #endif 
-        
         int radius = range/2;
         float shortest_distance = INFINITY;
         int closest_tribe = -1;
@@ -210,16 +207,11 @@ private:
                 }
             }
         }
-
-        #ifdef DEBUG
-        searchNearbyTribeTime = t.elapsed();
-        #endif
         return closest_tribe;
     }
 
     void register_new_tribe(Tribe newTribe)
     {
-        
         if (newTribe.size() >= TRIBE_MIN_POPULATION) {
             // qualified to establish a new tribe
             int tribe_index = tribes.size();
@@ -238,79 +230,62 @@ private:
      */ 
     void init_tribes() 
     {
-
         #ifdef DEBUG
         Timer t;
         t.reset();
         #endif 
+        // auto conv = this->convolution();
+        // auto max_pool = this->max_pooling(conv.matrix, conv.height, conv.width);
+        int BFS_count = 0;
+        for (int r = 0; r < M; r++) {
+            for (int c = 0; c < N; c++) {
 
-        auto conv = this->convolution();
-        auto max_pool = this->max_pooling(conv.matrix, conv.height, conv.width);
-        for (int r = 0; r < max_pool.height; r++) {
-            for (int c = 0; c < max_pool.width; c++) {
+                // if no life in location (r,c)
+                if (grid[r * N + c] == 0) continue; 
 
-                // get tribe leader from max pooling result
-                pair<int, int> tribe_leader= max_pool.matrix[r * max_pool.height + c];
+                // else, appoint this life as the tribe leader 
+                pair<int, int> tribe_leader= pair<int,int>(r,c);
 
-                // if there's no tribe leader in this area
-                if (tribe_leader.first == -1) continue; 
+                // if already a member of some tribe
+                if (getTribeMembership(tribe_leader) != -1) continue;
 
-                // collect all life in matrix starting with the coordinates of this tribe leader
-                Tribe newTribe; 
-                for (int tr = tribe_leader.first; tr < tribe_leader.first + CONV_MATRIX_SIZE; tr++) {
-                    for (int tc = tribe_leader.second; tc < tribe_leader.second + CONV_MATRIX_SIZE; tc++) {
-                        
-                        if (grid[tr * N + tc] > 0) {
-                            Member p = pair<int, int>(tr, tc);
-
-                            // if already a member of some tribe
-                            if (getTribeMembership(p) != -1) continue; 
-
-                            // if already collected
-                            if (isInTribe(p, newTribe)) continue; 
-
-                            // find all neighbors within range using BFS
-                            vector<Member> valid_neighbors = BFS(p, newTribe);
-                            
-                            // the group looks for a nearby tribe to settle down
-                            int nearbyT = searchNearbyTribe(valid_neighbors);
-                            if (nearbyT == -1)  // if there's no tribe nearby
-                            {
-                                newTribe.insert(newTribe.end(), valid_neighbors.begin(), valid_neighbors.end());
-                                for (auto n : valid_neighbors) 
-                                    map[n.first * N + n.second] = tribes.size();
-                            }
-                            else                // found nearby existing tribe, add this group of lives to the tribe found
-                            {               
-                                tribes[nearbyT].insert(tribes[nearbyT].end(), valid_neighbors.begin(), valid_neighbors.end());
-                                for (auto n : valid_neighbors) 
-                                    map[n.first * N + n.second] = nearbyT;
-                            }
-                        }
+                // gather the tribe members
+                Tribe newTribe = BFS(tribe_leader);
+                BFS_count ++;
+                
+                // the group looks for a nearby tribe to settle down
+                int nearbyT = searchNearbyTribe(newTribe);
+                if (nearbyT == -1)  // if there's no tribe nearby
+                {
+                    if (newTribe.size() >= TRIBE_MIN_POPULATION) {
+                        for (auto n : newTribe) map[n.first * N + n.second] = tribes.size();
+                        tribes.push_back(newTribe);
                     }
                 }
-                register_new_tribe(newTribe);
+                else                // found nearby existing tribe, add this group of lives to the tribe found
+                {               
+                    tribes[nearbyT].insert(tribes[nearbyT].end(), newTribe.begin(), newTribe.end());
+                    for (auto n : newTribe) 
+                        map[n.first * N + n.second] = nearbyT;
+                }
             }
         }
-
-
+        //cout << "BFS count: " << BFS_count << endl;
         #ifdef DEBUG
         initTime = t.elapsed();
         #endif
-
     }
 
     /* Find all members of each tribe using BFS */
-    vector<Member> BFS(Member seed, Tribe newTribe) {
+    vector<Member> BFS(Member seed) {
         #ifdef DEBUG
         Timer t;
         t.reset();
         #endif 
-
         // initialize queue
         vector<Member> queue;
         queue.push_back(seed);
-        vector<Member> visited = newTribe;
+        vector<Member> visited;
         vector<Member> new_neighbors = {seed};
 
         //find neighbors
@@ -345,7 +320,7 @@ private:
         }
 
         #ifdef DEBUG
-        bfsTime += t.elapsed();
+        bfsTime = t.elapsed();
         #endif
         return new_neighbors;
     }
@@ -355,17 +330,8 @@ private:
 public:
     
     // measurements
-    double convolutionTime = 0.0f;
-    double maxPoolingTime = 0.0f;
-    double searchNearbyTribeTime = 0.0f;
     double bfsTime = 0.0f;
     double initTime = 0.0f;
-
-    vector<int> grid;
-    const int M, N; // M = grid height; N = grid width
-    const int range;
-    vector<Tribe> tribes;
-    vector<int> map; // the map records the citizenship of life on every coordinate
 
     vector<string> colors = {BOLDYELLOW, BOLDGREEN, BOLDBLUE, BOLDRED, BOLDMAGENTA, BOLDCYAN, BOLDBLACK, BOLDWHITE};
 
@@ -382,10 +348,13 @@ public:
         this->init_tribes();
         int count = 0;
         for (auto t : tribes) {
-            // cout << "Tribe " << count << ": " << t.size() << endl;
+            //cout << "Tribe " << count << ": " << t.size() << endl;
+            // for (auto l : t) cout << "(" << l.first << "," << l.second << ")  ";
+            // cout << endl;
             count++;
         }
+        // printf("I am BFS\n");
         return tribes;
     }
+
 };
- 

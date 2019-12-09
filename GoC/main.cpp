@@ -1,20 +1,3 @@
-// #include "gameOfCivilizationSequential.h"
-// #include <unistd.h>
-
-// using namespace std;
-
-// int main() {
-//     GoC* seq_renderer = new SequentialGoC(50, 50, "config.txt");
-//     for (int i = 0; i < 50; i++) {
-//         seq_renderer->advanceGame();
-//         cout << "Generation "  << i+1 << endl; 
-//         seq_renderer->printGrid();
-        
-//     }
-//     return 0;
-// }
-
-
 #include "gameOfCivilizationSequential.h"
 #include "timing.h"
 #include <iostream>
@@ -28,7 +11,7 @@ int main(int argc,char* argv[]) {
     int count = -1;
     int width = 50;
     int height = 50;
-    int printseq = 0;
+    int printcuda = 0;
 
     int opt;
     
@@ -44,7 +27,7 @@ int main(int argc,char* argv[]) {
                 width = atoi(optarg);
                 break;
             case 'p':
-                printseq = 1;
+                printcuda = 1;
                 break;
             default:
                 printf("Usage: ./cudaGame -n n -w w -h h -p\n");
@@ -53,28 +36,52 @@ int main(int argc,char* argv[]) {
     }
 
     if (width <= 0 || height <= 0 || count <= 0) {
-        printf("Usage: ./cudaGame -n n -w w -h h -p\n");
+        printf("Usage: ./cudaGame -n n -w w -h h -p \n");
         return -1;
     }
 
-    GoC* seq_renderer = new SequentialGoC(width, height, "config.txt");
+    SequentialGoC* cuda_renderer = new SequentialGoC(width, height);
+    //SequentialGoC* cuda_renderer = new SequentialGoC(width, height, "config.txt");
 
-    double totalSeqTime = 0.0f;
-    //seq_renderer->printGrid();
+    double totalCudaTime = 0.0f;
+    double totalSimTime = 0.0f;
+    double convolutionTime = 0.0f;
+    double maxPoolingTime = 0.0f;
+    double searchNearbyTribeTime = 0.0f;
+    double bfsTime = 0.0f;
+    double initTime = 0.0f;
+
+
     for (int i = 0; i < count; i++) {
         Timer t;
         t.reset();
-        seq_renderer->advanceGame();
-        double simulateStepTime = t.elapsed();
-        totalSeqTime += simulateStepTime;
-        if (printseq) {
-            cout << "Next Generation" << endl; 
-            seq_renderer->printGrid();
+        Timer t2;
+        t2.reset();
+        cuda_renderer->advanceGame();
+        totalCudaTime += t2.elapsed();
+        cuda_renderer->render();
+
+        convolutionTime += cuda_renderer->map->convolutionTime;
+        maxPoolingTime += cuda_renderer->map->maxPoolingTime;
+        bfsTime += cuda_renderer->map->bfsTime;
+        searchNearbyTribeTime += cuda_renderer->map->searchNearbyTribeTime;
+        initTime += cuda_renderer->map->initTime;
+
+        totalSimTime += t.elapsed();
+        if (printcuda) {
+            cout << "Next Generation" << endl;
+            cuda_renderer->printGrid();
         }
         usleep(200000);
     }
-
-    printf("Total simulation time for sequential version: %.6fms\n", totalSeqTime*1000.0f);
+    
+    printf("Convolution time: %.6fms\n", convolutionTime * 1000.0f);
+    printf("Max pooling time: %.6fms\n", maxPoolingTime * 1000.0f);
+    printf("BFS time: %.6fms\n", bfsTime * 1000.0f);
+    printf("Search nearby neighbor time: %.6fms\n", searchNearbyTribeTime * 1000.0f);
+    printf("Total classification time: %.6fms\n", initTime * 1000.0f);
+    printf("Total GoL time: %.6fms\n", totalCudaTime * 1000.0f);
+    printf("Total simulation time for SEQUENTIAL version: %.6fms\n", totalSimTime * 1000.0f);
 
     return 0;
 }

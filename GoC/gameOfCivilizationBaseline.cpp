@@ -10,20 +10,20 @@
 #include <sstream>
 #include <vector>
 
-#include "gameOfCivilizationSequential.h"
+#include "gameOfCivilizationBaseline.h"
 
 #define IDX(X, Y) ((X) * this->width + (Y)) 
 
 using namespace std;
 
-SequentialGoC::SequentialGoC(int W, int H) {
+BaselineGoC::BaselineGoC(int W, int H) {
     this->width = W;
     this->height = H;
     this->renderer = new SequentialGame(W, H);
     this->map = new Map(H, W, 8, renderer->grid);
 }
 
-SequentialGoC::SequentialGoC(int W, int H, std::string filename) {
+BaselineGoC::BaselineGoC(int W, int H, std::string filename) {
     this->width = W;
     this->height = H;
     this->renderer = new SequentialGame(W, H, filename);
@@ -32,7 +32,7 @@ SequentialGoC::SequentialGoC(int W, int H, std::string filename) {
 
 
 void 
-SequentialGoC::printGrid() {
+BaselineGoC::printGrid() {
     int tribe_index = 2;
     for (auto t : tribes) {
         for (auto p : t) renderer->grid[IDX(p.first, p.second)] = tribe_index;
@@ -55,12 +55,12 @@ SequentialGoC::printGrid() {
 }
 
 void 
-SequentialGoC::advanceGame() {
+BaselineGoC::advanceGame() {
     renderer->advanceGame();
 }
 
 void
-SequentialGoC::render() {
+BaselineGoC::render() {
     map = new Map(this->height, this->width, 8, renderer->grid);
     //map->grid = renderer->grid;
     tribes = map->get_tribes();

@@ -1,38 +1,43 @@
 #ifndef __GAME_OF_CIVILIZATION_CUDA_H__
 #define __GAME_OF_CIVILIZATION_CUDA_H__
 
+#include "../GoL/gameOfLifeCuda.h"
 #include "gameOfCivilization.h"
+#include "AreaDivisionParallel.cpp"
 
 #include <vector>
 #include <iostream>
 #include <string>
 
-class CudaGame : public Game {
+class CudaGoC : public GoC {
 
 private:
+
     int width;
     int height;
-    std::vector<int> grid;
-    std::vector<int> future;
-
+    vector<Tribe> tribes;
+ 
     //cuda variables
     int* cudaDeviceGrid;
     int* cudaDeviceFuture;
 
 public:
 
-    CudaGame(int W, int H, std::string filename);
-    //virtual ~SequentialRenderer();
+
+    CudaGame* renderer;
+    Map* map = NULL;
+
+    CudaGoC(int width, int height);
+
+    CudaGoC(int width, int height, std::string filename);
 
     void setup();
-    
+
     void printGrid();
 
     void advanceGame();
 
-
-    //void render();
-
+    void render();
 
 };
 

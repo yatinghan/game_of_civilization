@@ -5,9 +5,13 @@ class GoC {
 
 public:
 
+    //virtual void setup();
+
     virtual void printGrid() = 0;
 
     virtual void advanceGame() = 0;
+
+    virtual void render() = 0;
 
 };
 

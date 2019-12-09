@@ -83,9 +83,9 @@ private:
         int conv_result_width = N - CONV_MATRIX_SIZE + 1;
         vector<int> conv_result(conv_result_height * conv_result_width, 0); 
         
+        #pragma omp parallel for num_threads(4) schedule(dynamic, 5)
         for (int grid_r = 0; grid_r < conv_result_height; grid_r++) {
             for (int grid_c = 0; grid_c < conv_result_width; grid_c++) {
-                
                 int total = 0;
                 for (int mat_r = 0; mat_r < CONV_MATRIX_SIZE; mat_r ++) {
                     for (int mat_c = 0; mat_c < CONV_MATRIX_SIZE; mat_c++) {
@@ -117,7 +117,9 @@ private:
         int pool_result_width = input_w - MAX_POOL_SIZE + 1;
         vector<Member> pool_result(pool_result_height * pool_result_width, pair<int, int>(-1,-1)); 
         
+        #pragma omp parallel for num_threads(4) schedule(dynamic, 5)
         for (int grid_r = 0; grid_r < pool_result_height; grid_r++) {
+            
             for (int grid_c = 0; grid_c < pool_result_width; grid_c++) {
                 int max = 0;
                 Member max_coord;
@@ -388,4 +390,3 @@ public:
         return tribes;
     }
 };
- 
