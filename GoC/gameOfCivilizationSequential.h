@@ -16,7 +16,7 @@ private:
 
     int width;
     int height;
-    SequentialGame* renderer = NULL;
+    SequentialGame* renderer;
     //Map* map = NULL;
 
 public:
