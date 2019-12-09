@@ -24,7 +24,11 @@ SequentialGame::SequentialGame(int W, int H, std::string filename) {
     this->grid.resize(W*H);
     std::fill(this->grid.begin(), this->grid.end(), 0);
     this->future.resize(W*H);
-    //std::fill(this->future.begin(), this->future.end(), 0);
+    
+    this->history.world_map.height = H;
+    this->history.world_map.width = W;
+    this->history.world_map.matrix = vector<int>(W*H, -1);
+    this->history.nations = vector<Nation>();
 
     ifstream readfile(filename);
     if ( readfile.is_open() )
@@ -50,7 +54,6 @@ SequentialGame::SequentialGame(int W, int H, std::string filename) {
 void
 SequentialGame::printGrid() {
 
-    Map::print_map(history.world_map);
     // auto tribes = map.get_tribes();
     // int tribe_index = 2;
     // for (auto t : tribes) {
@@ -116,7 +119,7 @@ SequentialGame::advanceGame()  {
 
     // paint map of the current world
     Map world_map = Map(this->height, this->width, 8, this->grid, history);
-    world_map.init_map();
     world_map.war();
     history = world_map.write_history();
+    world_map.print_map();
 }

@@ -4,21 +4,24 @@
 #include <vector>
 #include <math.h>
 #include <assert.h>
+#include <algorithm>
+#include <stdlib.h>
+#include <unistd.h>
 
 #define CONV_MATRIX_SIZE 10
 #define MAX_POOL_SIZE 10
 #define TRIBE_MIN_POPULATION 15
 #define NATION_MIN_POPULATION 30
 
-const string RESET       = "\033[0m";
-const string BOLDBLACK   = "\033[1m\033[40m";      /* Bold Black */
-const string BOLDRED     = "\033[1m\033[41m";      /* Bold Red */
-const string BOLDGREEN   = "\033[1m\033[42m";      /* Bold Green */
-const string BOLDYELLOW  = "\033[1m\033[43m";      /* Bold Yellow */
-const string BOLDBLUE    = "\033[1m\033[44m";      /* Bold Blue */
-const string BOLDMAGENTA = "\033[1m\033[45m";      /* Bold Magenta */
-const string BOLDCYAN    = "\033[1m\033[46m";      /* Bold Cyan */
-const string BOLDWHITE   = "\033[1m\033[47m";      /* Bold White */
+#define RESET   "\033[0m"
+#define BOLDBLACK   "\033[1m\033[40m"      /* Bold Black */
+#define BOLDRED     "\033[1m\033[41m"      /* Bold Red */
+#define BOLDGREEN   "\033[1m\033[42m"      /* Bold Green */
+#define BOLDYELLOW  "\033[1m\033[43m"      /* Bold Yellow */
+#define BOLDBLUE    "\033[1m\033[44m"      /* Bold Blue */
+#define BOLDMAGENTA "\033[1m\033[45m"      /* Bold Magenta */
+#define BOLDCYAN    "\033[1m\033[46m"      /* Bold Cyan */
+#define BOLDWHITE   "\033[1m\033[47m"      /* Bold White */
 
 using namespace std;
 typedef pair<int, int> Member; // pair<row, column>
@@ -40,7 +43,7 @@ struct Nation {
 };
 
 struct History {
-    Matrix<int> world_map;
+    Matrix<int> world_map; // nations only; tribes not painted
     vector<Nation> nations;
 };
 
@@ -48,13 +51,13 @@ class Map {
 
 private:
 
-    vector<int> grid;
+    vector<int> grid; // the grid records life or death of each cell
+    vector<int> map; // the map records the citizenship/tribe membership of each cell
     const int M, N; // M = grid height; N = grid width
     const int range;
     vector<Tribe> tribes;
     vector<Nation> nations;
-    History history;
-    vector<int> map; // the map records the citizenship of life on every coordinate
+    History history; // history map only records the territory of nations
 
     void printIntMatrix(Matrix<int> mat)
     {
@@ -163,6 +166,37 @@ private:
         return shortest_dist;
     }
 
+    /* find the shortest distance to the nation of given index */
+    float distance_to_nation(Member p, int nation_index) 
+    {
+        Nation n = nations[nation_index];
+        float shortest_dist = INFINITY;
+        Member closest;
+        for (auto member : n.people)
+        {
+            float dist = (member.first - p.first) * (member.first - p.first) + 
+                         (member.second - p.second) * (member.second - p.second);
+            if (dist < shortest_dist) {
+                shortest_dist = dist;
+                closest = member;
+            }
+        }
+        cout << "(" << p.first << ", " << p.second;
+        cout << ") shortest distance to " << nation_index;
+        cout << " is " << shortest_dist;
+        cout << " from (" << closest.first << ", " << closest.second << ")";
+        cout << " who is from " << map[closest.first * N + closest.second] << endl;
+        return shortest_dist;
+    }
+
+    int whose_closer(Member p, int a, int b)
+    {
+        float distA = distance_to_nation(p, a);
+        float distB = distance_to_nation(p, b);
+        int closer = (distB < distA) ? b : a;
+        return closer;
+    }
+
     int getTribeMembership(Member p)
     {
         // p coordinates out of bound
@@ -172,8 +206,25 @@ private:
         // p is not alive
         if (grid[p.first*N+p.second] == 0) return -1;
 
-        int tribe_index = map[p.first * N + p.second] == tribes.size() ? -1 : map[p.first * N + p.second];
-        return tribe_index;
+        int tribe_index = map[p.first * N + p.second];
+        if (tribe_index == -1 || tribe_index < nations.size() || tribe_index >= nations.size() + tribes.size())
+            return -1;
+        // return tribe index without offset
+        return tribe_index - nations.size();
+    }
+
+    int getCitizenship(Member p)
+    {
+        // p coordinates out of bound
+        bool withinBound = (0 <= p.first && p.first < M) && (0 <= p.second && p.second < N);
+        if (!withinBound) return -1;
+
+        // p is not alive
+        if (grid[p.first*N+p.second] == 0) return -1;
+
+        int nation_index = map[p.first * N + p.second];
+        if (nation_index == -1 || nation_index >= nations.size()) return -1;
+        else return nation_index;
     }
 
     bool isInTribe(Member p, Tribe t)
@@ -280,6 +331,233 @@ private:
         }
     }
 
+    void init_tribes_BFS_only() 
+    {
+        for (int r = 0; r < M; r++) {
+            for (int c = 0; c < N; c++) {
+
+                // if no life in location (r,c)
+                if (grid[r * N + c] == 0) continue; 
+
+                // else, appoint this life as the tribe leader 
+                pair<int, int> tribe_leader= pair<int,int>(r,c);
+
+                // if already a citizen of some nation
+                if (getCitizenship(tribe_leader) != -1) continue;
+
+                // if already a member of some tribe
+                if (getTribeMembership(tribe_leader) != -1) continue;
+
+                // gather the tribe members
+                Tribe dummy;
+                Tribe newTribe = BFS(tribe_leader, dummy);
+                
+                // the group looks for a nearby tribe to settle down
+                int nearbyT = searchNearbyTribe(newTribe);
+                if (nearbyT == -1)  // if there's no tribe nearby
+                {
+                    if (newTribe.size() >= TRIBE_MIN_POPULATION) {
+                        for (auto n : newTribe) 
+                            map[n.first * N + n.second] = tribes.size() + nations.size();
+                        tribes.push_back(newTribe);
+                    }
+                }
+                else                // found nearby existing tribe, add this group of lives to the tribe found
+                {   
+                    tribes[nearbyT].insert(tribes[nearbyT].end(), newTribe.begin(), newTribe.end());
+                    for (auto n : newTribe) 
+                        map[n.first * N + n.second] = nearbyT + nations.size();
+                }
+            }
+        }
+    }
+
+    void generate_new_nation(Tribe t)
+    {
+        if (t.size() < NATION_MIN_POPULATION) return;
+        Nation newNation;
+
+        newNation.color = available_colors.front();
+        available_colors.erase(available_colors.begin());
+
+        newNation.land = t;
+        newNation.people = t;
+        newNation.years_of_history = 1;
+        newNation.technology_index = 2;
+        int nation_index = nations.size();
+        for (auto p: t) map[p.first * N + p.second] = nation_index;
+
+        nations.push_back(newNation);
+    }
+
+    void expand_nations()
+    {
+        vector<vector<Member>> neighbors_list;
+        for (int i = 0; i < nations.size(); i++) {
+            // find new neighbors
+            vector<Member> new_neighbors = BFS_for_nation(nations[i].people);
+            neighbors_list.push_back(new_neighbors);
+        }
+
+        // check duplicates
+        for (int i = 0; i < neighbors_list.size(); i++) {
+            for (int j = i+1; j < neighbors_list.size(); j++) {
+                for (int ii = 0; ii < neighbors_list[i].size(); ii++) {
+                    for (int jj = 0; jj < neighbors_list[j].size(); jj++) {
+                        Member a = neighbors_list[i][ii], b = neighbors_list[j][jj];
+                        if (a.first == b.first && a.second == b.second) {
+                            // detected duplicate
+                            cout << "Found dup between nation " << i << " and " << j << endl;
+                            int loser = (whose_closer(a, i, j) == i) ? j : i;
+                            cout << "--> Loser is " << loser << endl;
+                            int lost_member = loser == i ? ii : jj;
+                            neighbors_list[loser][lost_member] = pair<int, int>(-1, -1);
+                        }
+                    }
+                }
+            }
+        }
+        auto dup_predicate = [](Member p){ return p.first == -1;};
+
+        // delete duplicates
+        for (int i = 0; i < neighbors_list.size(); i++) {
+            neighbors_list[i].erase(
+                remove_if(neighbors_list[i].begin(), neighbors_list[i].end(), dup_predicate),
+                neighbors_list[i].end());
+        }
+
+
+        for (int i = 0; i < nations.size(); i++) {
+            // nation index
+            Member p = nations[i].people.front();
+            int nation_index = map[p.first * N + p.second];
+
+            nations[i].people.insert(nations[i].people.end(), neighbors_list[i].begin(), neighbors_list[i].end());
+
+            // expand territory and mark new territory on map
+            nations[i].land.insert(nations[i].land.end(), neighbors_list[i].begin(), neighbors_list[i].end());
+            for (auto n: neighbors_list[i]) map[n.first * N + n.second] = nation_index;
+        }
+    }
+
+    void init_nations()
+    {
+        nations = history.nations;
+        for (int nat = 0; nat < nations.size(); nat++) {
+
+            // update years of history and technology index
+            nations[nat].years_of_history++;
+            nations[nat].technology_index += nations[nat].years_of_history*2;
+
+            // update census
+            nations[nat].people.clear();
+            for (auto point: nations[nat].land) {
+                // if there's life in this address
+                if (grid[point.first * N + point.second] > 0) 
+                    nations[nat].people.push_back(point);
+            }
+
+            // Take its color off the list of publicly available colors
+            for (int i = 0; i < available_colors.size(); i++) {
+                if (nations[nat].color == available_colors[i]) 
+                    available_colors.erase(available_colors.begin()+i);
+            }
+        }
+        expand_nations();
+    }
+
+    void init_world()
+    {
+        map = history.world_map.matrix;
+
+        init_nations();
+        init_tribes_BFS_only();
+        
+        vector<Tribe> remainTribes;
+        for (int i = 0; i < tribes.size(); i++)
+        {
+            if (tribes[i].size() >= NATION_MIN_POPULATION) {
+                cout << "Tribe " << i << " upgrades to nation!!!" << endl; 
+                generate_new_nation(tribes[i]);
+                // tribes.erase(tribes.begin() + i);
+            }
+            else {
+                remainTribes.push_back(tribes[i]);
+                cout << "Tribe " << i << " remains a tribe :(" << endl; 
+            }
+        }
+        tribes = remainTribes;
+
+        //update tribe indices
+        for (int i = 0; i < tribes.size(); i++) {
+            for (auto p: tribes[i]) {
+                map[p.first * N + p.second] = nations.size() + i;
+            }
+        }
+
+        for (int i = 0; i < tribes.size(); i++) {
+            cout << "tribe " << i;
+            cout << ": people: " << tribes[i].size();
+            Member p = tribes[i].front();
+            int membership = map[p.first * N + p.second];
+            cout << "; color of (" << p.first << ", " << p.second << ") of membership " << membership << " : ";
+            cout << available_colors[(membership - nations.size()) % available_colors.size()] << "   "  << RESET << endl;
+        }
+        for (int i = 0; i < nations.size(); i++) {
+            cout << "nation " << i;
+            cout << ": people: " << nations[i].people.size();
+            cout << "; land: " << nations[i].land.size();
+            cout << "; color: " << nations[i].color << "   "  << RESET << endl;
+        }
+
+        cout << "Available colors: " ;
+        for (int i = 0; i < available_colors.size(); i++) {
+            cout << available_colors[i] << "   "  << RESET;
+        }
+        cout << endl;
+    }
+
+
+    vector<Member> BFS_for_nation(vector<Member> people) {
+        // initialize queue
+        vector<Member> queue = people;
+        vector<Member> visited;
+        vector<Member> new_neighbors;
+
+        //find neighbors
+        int radius = range/2;
+        while (!queue.empty())
+        {
+            Member p = queue.front();
+            if (!isInTribe(p, visited)) {
+                visited.push_back(p);
+                if (!isInTribe(p, new_neighbors) && !isInTribe(p, people)) new_neighbors.push_back(p);
+                for (int r = p.first - radius; r <= p.first + radius; r++) {
+                    for (int c = p.second - radius; c <= p.second + radius; c++) {
+                        if (r == p.first && c == p.second) continue;                           // neighbor is p itself
+                        bool withinBound = (0 <= r && r < M) && (0 <= c && c < N);
+                        if (!withinBound) continue;                                            // neighbor is out of bound
+                        if (grid[r*N+c] == 0) continue;                                        // neighbor is not alive
+
+                        Member neighbor = pair<int,int>(r,c);
+                        if (getCitizenship(neighbor) != -1) continue;                          // neighbor is already a citizen
+                        if (isInTribe(neighbor, visited)) continue;                            // neighbor is already visited
+                        if (isInTribe(neighbor, queue)) continue;                              // neighbor is already in queue
+                        if (isInTribe(neighbor, people)) continue;                             // neighbor is already in this nation
+
+                        float delta_r = abs(neighbor.first - p.first);
+                        float delta_c = abs(neighbor.second - p.second);
+                        if (delta_c * delta_c + delta_r * delta_r > radius * radius) continue; // neighbor is too far: distance > radius
+                        
+                        queue.push_back(neighbor);
+                    }
+                }
+            }
+            queue.erase(queue.begin());
+        }
+        return new_neighbors;
+    }
+
     /* Find all members of each tribe using BFS */
     vector<Member> BFS(Member seed, Tribe newTribe) {
         // initialize queue
@@ -304,6 +582,7 @@ private:
                         if (grid[r*N+c] == 0) continue;                                        // neighbor is not alive
 
                         Member neighbor = pair<int,int>(r,c);
+                        if (getCitizenship(neighbor) != -1) continue;                          // neighbor is in other nation
                         if (getTribeMembership(neighbor) != -1) continue;                      // neighbor is in other tribe
                         else if (isInTribe(neighbor, visited)) continue;                       // neighbor is already visited
                         else if (isInTribe(neighbor, queue)) continue;                         // neighbor is already in queue
@@ -325,63 +604,63 @@ private:
 
 public:
 
-    vector<string> colors = {BOLDYELLOW, BOLDGREEN, BOLDBLUE, BOLDRED, BOLDMAGENTA, BOLDCYAN, BOLDBLACK, BOLDWHITE};
+    vector<string> available_colors = {BOLDYELLOW, BOLDGREEN, BOLDBLUE, BOLDRED, BOLDMAGENTA, BOLDCYAN, BOLDBLACK, BOLDWHITE};
 
     Map(int M, int N, int range, vector<int> grid, History history) : 
         M(M), N(N), range(range), grid(grid), history(history)
     {
-        vector<int> empty(grid.size(), -1); 
-        map = empty;
-    }
-
-    vector<Tribe> get_tribes() 
-    {   
-        tribes.clear();
-        this->init_tribes();
-        int count = 0;
-        for (auto t : tribes) {
-            cout << "Tribe " << count << ": " << t.size() << endl;
-            // for (auto l : t) cout << "(" << l.first << "," << l.second << ")  ";
-            // cout << endl;
-            count++;
-        }
-        // cout << tribes.size() << " tribes in total" << endl;
-        return tribes;
-    }
-
-    vector<Nation> get_nations()
-    {
-
-    }
-
-    void init_map()
-    {
-
+        init_world();
     }
 
     void war()
     {
-
+        if (nations.size() == 4) {
+            for (auto n: nations) 
+                if (n.land.size() < 150) return;
+            int nation1 = rand() % 4;
+            int nation2 = rand() % 4;
+            while (nation2 == nation1) nation2 = rand() % 4;
+            int ifwar = rand() % 10;
+            ifwar = (ifwar == 1) ? 1 : 0;
+            if (ifwar) {
+                for (int i = 0; i < 3; i++) {
+                    print_map(ifwar, nation1, nation2);
+                    usleep(200000);
+                    print_map();
+                    usleep(200000);
+                }
+            }
+        }
     }
 
     /* 
      * print map with nations and tribes 
-     * 0 = barren; 1 = barbarian; 2+ = nation/tribe index
+     * 0 = barren; 1 = barbarian; 2+ = nation/tribe index 
      */
-    static void print_map(Matrix<int> map)
+    void print_map(int war = 0, int nation1 = -1, int nation2 = -1)
     {
-        vector<string>colors = {BOLDYELLOW, BOLDGREEN, BOLDBLUE, BOLDRED, BOLDMAGENTA, BOLDCYAN, BOLDBLACK, BOLDWHITE};
-
-        for (int r = 0; r < map.height; r++) 
+        assert(available_colors.size() + nations.size() == 8);
+        for (int r = 0; r < M; r++) 
         { 
-            for (int c = 0; c < map.width; c++) 
-            { 
-                if (map.matrix[r*map.width+c] == 0) 
-                    cout << ". "; 
-                else if (map.matrix[r*map.width+c] == 1)
-                    cout << "* "; 
-                else 
-                    cout << colors[(map.matrix[r*map.width+c]-2)%8] << "* " << RESET;
+            for (int c = 0; c < N; c++) 
+            {   
+                int membership = map[r*N+c];
+                int life = grid[r*N+c];
+
+                // determine color
+                if (membership != -1) {
+                    if (membership < nations.size()) {
+                        if (war == 1 && (membership == nation1 || membership == nation2))
+                            cout << BOLDBLACK;
+                        else cout << nations[map[r*N+c]].color;
+                    }
+                    else  
+                        cout << available_colors[(membership - nations.size()) % available_colors.size()];
+                }
+
+                // determine life or death
+                if (life) cout << "* " << RESET; 
+                else      cout << ". " << RESET; 
             } 
             cout << RESET << endl; 
         }
@@ -399,6 +678,13 @@ public:
 
         history.world_map = map_matrix;
         history.nations = nations;
+
+        // erase tribes
+        for (auto t: tribes) {
+            for (auto p: t) {
+                history.world_map.matrix[p.first*N+p.second] = -1;
+            }
+        }
         return history;
     }
 
