@@ -49,28 +49,28 @@ SequentialGame::SequentialGame(int W, int H, std::string filename) {
 
 void
 SequentialGame::printGrid() {
-    
-    Map map = Map(this->height, this->width, 8, this->grid);
-    auto tribes = map.get_tribes();
-    int tribe_index = 2;
-    for (auto t : tribes) {
-        for (auto p : t) this->grid[IDX(p.first, p.second)] = tribe_index;
-        tribe_index ++;
-    }
 
-    for (int i = 0; i < this->height; i++) 
-    { 
-        for (int j = 0; j < this->width; j++) 
-        { 
-            if (this->grid[IDX(i, j)] == 0) 
-                cout << ". "; 
-            else if (this->grid[IDX(i, j)] == 1)
-                cout << "* "; 
-            else 
-                cout << map.colors[(this->grid[IDX(i, j)]-2)%8] << "* " << RESET;
-        } 
-        cout << RESET << endl; 
-    } 
+    Map::print_map(history.world_map);
+    // auto tribes = map.get_tribes();
+    // int tribe_index = 2;
+    // for (auto t : tribes) {
+    //     for (auto p : t) this->grid[IDX(p.first, p.second)] = tribe_index;
+    //     tribe_index ++;
+    // }
+
+    // for (int i = 0; i < this->height; i++) 
+    // { 
+    //     for (int j = 0; j < this->width; j++) 
+    //     { 
+    //         if (this->grid[IDX(i, j)] == 0) 
+    //             cout << ". "; 
+    //         else if (this->grid[IDX(i, j)] == 1)
+    //             cout << "* "; 
+    //         else 
+    //             cout << map.colors[(this->grid[IDX(i, j)]-2)%8] << "* " << RESET;
+    //     } 
+    //     cout << RESET << endl; 
+    // } 
 }
 
 void 
@@ -113,4 +113,10 @@ SequentialGame::advanceGame()  {
     } 
 
     swap(grid, future);
+
+    // paint map of the current world
+    Map world_map = Map(this->height, this->width, 8, this->grid, history);
+    world_map.init_map();
+    world_map.war();
+    history = world_map.write_history();
 }

@@ -10,15 +10,15 @@
 #define TRIBE_MIN_POPULATION 15
 #define NATION_MIN_POPULATION 30
 
-#define RESET   "\033[0m"
-#define BOLDBLACK   "\033[1m\033[40m"      /* Bold Black */
-#define BOLDRED     "\033[1m\033[41m"      /* Bold Red */
-#define BOLDGREEN   "\033[1m\033[42m"      /* Bold Green */
-#define BOLDYELLOW  "\033[1m\033[43m"      /* Bold Yellow */
-#define BOLDBLUE    "\033[1m\033[44m"      /* Bold Blue */
-#define BOLDMAGENTA "\033[1m\033[45m"      /* Bold Magenta */
-#define BOLDCYAN    "\033[1m\033[46m"      /* Bold Cyan */
-#define BOLDWHITE   "\033[1m\033[47m"      /* Bold White */
+const string RESET       = "\033[0m";
+const string BOLDBLACK   = "\033[1m\033[40m";      /* Bold Black */
+const string BOLDRED     = "\033[1m\033[41m";      /* Bold Red */
+const string BOLDGREEN   = "\033[1m\033[42m";      /* Bold Green */
+const string BOLDYELLOW  = "\033[1m\033[43m";      /* Bold Yellow */
+const string BOLDBLUE    = "\033[1m\033[44m";      /* Bold Blue */
+const string BOLDMAGENTA = "\033[1m\033[45m";      /* Bold Magenta */
+const string BOLDCYAN    = "\033[1m\033[46m";      /* Bold Cyan */
+const string BOLDWHITE   = "\033[1m\033[47m";      /* Bold White */
 
 using namespace std;
 typedef pair<int, int> Member; // pair<row, column>
@@ -35,10 +35,12 @@ struct Nation {
     string color;
     vector<Point> land;
     vector<Member> people;
+    int years_of_history;
+    int technology_index;
 };
 
 struct History {
-    std::vector<int> map; // only the territory of the nations are painted on the map
+    Matrix<int> world_map;
     vector<Nation> nations;
 };
 
@@ -51,6 +53,7 @@ private:
     const int range;
     vector<Tribe> tribes;
     vector<Nation> nations;
+    History history;
     vector<int> map; // the map records the citizenship of life on every coordinate
 
     void printIntMatrix(Matrix<int> mat)
@@ -324,8 +327,8 @@ public:
 
     vector<string> colors = {BOLDYELLOW, BOLDGREEN, BOLDBLUE, BOLDRED, BOLDMAGENTA, BOLDCYAN, BOLDBLACK, BOLDWHITE};
 
-    Map(int M, int N, int range, vector<int> grid) : 
-        M(M), N(N), range(range), grid(grid)
+    Map(int M, int N, int range, vector<int> grid, History history) : 
+        M(M), N(N), range(range), grid(grid), history(history)
     {
         vector<int> empty(grid.size(), -1); 
         map = empty;
@@ -351,9 +354,52 @@ public:
 
     }
 
-    vector<int> get_map()
+    void init_map()
     {
 
+    }
+
+    void war()
+    {
+
+    }
+
+    /* 
+     * print map with nations and tribes 
+     * 0 = barren; 1 = barbarian; 2+ = nation/tribe index
+     */
+    static void print_map(Matrix<int> map)
+    {
+        vector<string>colors = {BOLDYELLOW, BOLDGREEN, BOLDBLUE, BOLDRED, BOLDMAGENTA, BOLDCYAN, BOLDBLACK, BOLDWHITE};
+
+        for (int r = 0; r < map.height; r++) 
+        { 
+            for (int c = 0; c < map.width; c++) 
+            { 
+                if (map.matrix[r*map.width+c] == 0) 
+                    cout << ". "; 
+                else if (map.matrix[r*map.width+c] == 1)
+                    cout << "* "; 
+                else 
+                    cout << colors[(map.matrix[r*map.width+c]-2)%8] << "* " << RESET;
+            } 
+            cout << RESET << endl; 
+        }
+    }
+
+    /* convert Map to History */
+    History write_history()
+    {
+        History history;
+
+        Matrix<int> map_matrix;
+        map_matrix.height = M; 
+        map_matrix.width = N;
+        map_matrix.matrix = map;
+
+        history.world_map = map_matrix;
+        history.nations = nations;
+        return history;
     }
 
 };
