@@ -229,6 +229,7 @@ private:
     {
         auto conv = this->convolution();
         auto max_pool = this->max_pooling(conv.matrix, conv.height, conv.width);
+        int BFS_count = 0, BFS_ret_len = 0;
         for (int r = 0; r < max_pool.height; r++) {
             for (int c = 0; c < max_pool.width; c++) {
 
@@ -253,7 +254,8 @@ private:
                             if (isInTribe(p, newTribe)) continue; 
 
                             // find all neighbors within range using BFS
-                            vector<Member> valid_neighbors = BFS(p, newTribe);
+                            vector<Member> valid_neighbors = BFS(p, newTribe); 
+                            BFS_count ++; BFS_ret_len += valid_neighbors.size();
                             
                             // the group looks for a nearby tribe to settle down
                             int nearbyT = searchNearbyTribe(valid_neighbors);
@@ -265,7 +267,7 @@ private:
                             }
                             else                // found nearby existing tribe, add this group of lives to the tribe found
                             {               
-                                tribes[nearbyT].insert(newTribe.end(), valid_neighbors.begin(), valid_neighbors.end());
+                                tribes[nearbyT].insert(tribes[nearbyT].end(), valid_neighbors.begin(), valid_neighbors.end());
                                 for (auto n : valid_neighbors) 
                                     map[n.first * N + n.second] = nearbyT;
                             }
@@ -275,6 +277,9 @@ private:
                 register_new_tribe(newTribe);
             }
         }
+        cout << "BFS count: " << BFS_count << endl;
+        float avg = BFS_count == 0 ? 0.f : BFS_ret_len / BFS_count;
+        cout << "BFS avg return len: " << avg << endl;
     }
 
     /* Find all members of each tribe using BFS */
