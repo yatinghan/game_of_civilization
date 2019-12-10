@@ -11,7 +11,7 @@ Yuying Qian (yuyingq)
 
 ## Table of contents
 [Running the Game](#running_the_game)  
-[Final Report](#final_report) 
+[Final Report](#final_report)  
 [Project Checkpoint](#project_checkpoint)  
 [Project Proposal](#project_proposal)  
 [Work Breakdown](#work_breakdown)  
