@@ -107,6 +107,33 @@ private:
         return result;
     }
 
+    Matrix<int> local_min_layer(vector<int> input_matrix, int input_h, int input_w) 
+    {
+        vector<int> pool_result(input_h * input_w, 0); 
+        
+        for (int grid_r = 0; grid_r < input_h; grid_r++) {
+            for (int grid_c = 0; grid_c < input_w; grid_c++) {
+                int min = 9999;
+                for (int mat_r = grid_r - 1; mat_r <= grid_r + 1; mat_r ++) {
+                    for (int mat_c = grid_c - 1; mat_c <= grid_c + 1; mat_c++) {
+                        bool withinBound = (0 <= mat_r && mat_r < input_h) && (0 <= mat_c && mat_c < input_w);
+                        if (!withinBound) continue;
+                        if (input_matrix[mat_r * input_w + mat_c] < min) {
+                            min = input_matrix[mat_r * input_w + mat_c];
+                        }
+                    }
+                }
+                pool_result[grid_r * input_w + grid_c] = min;
+            }
+        }
+
+        Matrix<int> result; 
+        result.matrix = pool_result;
+        result.height = input_h;
+        result.width = input_w;
+        return result;
+    }
+
     Matrix<Member> max_pooling(vector<int> input_matrix, int input_h, int input_w) 
     {
         #ifdef DEBUG
@@ -293,6 +320,7 @@ private:
         #endif 
 
         auto conv = this->convolution();
+        conv = this->local_min_layer(conv.matrix, conv.height, conv.width);
         auto max_pool = this->min_pooling(conv.matrix, conv.height, conv.width);
         
         for (int r = 0; r < max_pool.height; r++) {
