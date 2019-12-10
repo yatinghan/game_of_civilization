@@ -15,28 +15,26 @@ int main(int argc,char* argv[]) {
 
     int opt;
     
-    while ((opt = getopt(argc, argv, "h:n:w:p")) != -1) {
+    while ((opt = getopt(argc, argv, "n:d:p")) != -1) {
         switch (opt) {
-            case 'h':                   
-                height = atoi(optarg);
-                break;
             case 'n':                   
                 count = atoi(optarg);
                 break;
-            case 'w':
+            case 'd':
                 width = atoi(optarg);
+                height = atoi(optarg);
                 break;
             case 'p':
                 printcuda = 1;
                 break;
             default:
-                printf("Usage: ./cudaGame -n n -w w -h h -p\n");
+                printf("Usage: ./seqGame -n n -d d -p\n");
                 return -1;
         }
     }
 
     if (width <= 0 || height <= 0 || count <= 0) {
-        printf("Usage: ./cudaGame -n n -w w -h h -p \n");
+        printf("Usage: ./seqGame -n n -d d -p\n");
         return -1;
     }
 

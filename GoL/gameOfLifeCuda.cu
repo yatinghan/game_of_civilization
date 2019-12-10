@@ -93,35 +93,6 @@ CudaGame::CudaGame(int W, int H, std::string filename) {
     }
 }
 
-// CudaGame::CudaGame(int W, int H, std::string filename, std::vector<int> grid2, std::vector<int> future2) {
-//     this->width = W;
-//     this->height = H;
-//     this->grid = grid2;
-//     this->future = future2;
-//     //this->future.resize(W*H);
-//     //std::fill(this->future.begin(), this->future.end(), 0);
-
-//     ifstream readfile(filename);
-//     if ( readfile.is_open() )
-//     {
-//         string fileline,xx,yy;
-//         int x, y;
-
-//         while (getline(readfile,fileline))
-//         {
-//             stringstream ss(fileline);
-//             getline(ss,xx,' ');
-//             getline(ss,yy,' ');
-//             x = stoi(xx);
-//             y = stoi(yy);
-//             this->grid[IDX(x, y)] = true;
-//         }
-//     }
-//     else {
-//         cout << "No such file, try again." << endl;
-//     }
-// }
-
 void
 CudaGame::setup() {
 
@@ -129,42 +100,11 @@ CudaGame::setup() {
     std::string name;
     cudaError_t err = cudaGetDeviceCount(&deviceCount);
 
-    printf("---------------------------------------------------------\n");
-    printf("Initializing CUDA for CudaRenderer\n");
-    printf("Found %d CUDA devices\n", deviceCount);
-
-    for (int i=0; i<deviceCount; i++) {
-        cudaDeviceProp deviceProps;
-        cudaGetDeviceProperties(&deviceProps, i);
-        name = deviceProps.name;
-
-        printf("Device %d: %s\n", i, deviceProps.name);
-        printf("   SMs:        %d\n", deviceProps.multiProcessorCount);
-        printf("   Global mem: %.0f MB\n", static_cast<float>(deviceProps.totalGlobalMem) / (1024 * 1024));
-        printf("   CUDA Cap:   %d.%d\n", deviceProps.major, deviceProps.minor);
-    }
-    printf("---------------------------------------------------------\n");
-
-    // By this time the scene should be loaded.  Now copy all the key
-    // data structures into device memory so they are accessible to
-    // CUDA kernels
-    //
-    // See the CUDA Programmer's Guide for descriptions of
-    // cudaMalloc and cudaMemcpy
 
     cudaMalloc(&cudaDeviceGrid, sizeof(int) * width * height);
     cudaMalloc(&cudaDeviceFuture, sizeof(int) * width * height);
 
     cudaMemcpy(cudaDeviceGrid, &grid[0], sizeof(int) * width * height, cudaMemcpyHostToDevice);
-
-
-    // Initialize parameters in constant memory.  We didn't talk about
-    // constant memory in class, but the use of read-only constant
-    // memory here is an optimization over just sticking these values
-    // in device global memory.  NVIDIA GPUs have a few special tricks
-    // for optimizing access to constant memory.  Using global memory
-    // here would have worked just as well.  See the Programmer's
-    // Guide for more information about constant memory.
 
     GlobalConstants params;
     params.width = width;

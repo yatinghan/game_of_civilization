@@ -331,7 +331,7 @@ public:
             // cout << endl;
             count++;
         }
-        // cout << tribes.size() << " tribes in total" << endl;
+        printf("I am BFS\n");
         return tribes;
     }
 
