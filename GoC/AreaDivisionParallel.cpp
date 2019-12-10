@@ -194,7 +194,8 @@ private:
         int radius = range/2;
         float shortest_distance = INFINITY;
         int closest_tribe = -1;
-        for (auto p: group_of_wanderers) {
+        
+        for (Member p: group_of_wanderers) {
             for (int r = p.first - radius; r <= p.first + radius; r++) {
                 for (int c = p.second - radius; c <= p.second + radius; c++) {
                     Member neighbor = pair<int,int>(r,c);
@@ -248,6 +249,7 @@ private:
 
         auto conv = this->convolution();
         auto max_pool = this->max_pooling(conv.matrix, conv.height, conv.width);
+        
         for (int r = 0; r < max_pool.height; r++) {
             for (int c = 0; c < max_pool.width; c++) {
 
@@ -259,6 +261,8 @@ private:
 
                 // collect all life in matrix starting with the coordinates of this tribe leader
                 Tribe newTribe; 
+                
+                #pragma omp taskloop
                 for (int tr = tribe_leader.first; tr < tribe_leader.first + CONV_MATRIX_SIZE; tr++) {
                     for (int tc = tribe_leader.second; tc < tribe_leader.second + CONV_MATRIX_SIZE; tc++) {
                         
@@ -274,24 +278,32 @@ private:
                             // find all neighbors within range using BFS
                             vector<Member> valid_neighbors = BFS(p, newTribe);
                             
+                            
                             // the group looks for a nearby tribe to settle down
                             int nearbyT = searchNearbyTribe(valid_neighbors);
                             if (nearbyT == -1)  // if there's no tribe nearby
                             {
-                                newTribe.insert(newTribe.end(), valid_neighbors.begin(), valid_neighbors.end());
-                                for (auto n : valid_neighbors) 
-                                    map[n.first * N + n.second] = tribes.size();
+                                #pragma omp critical
+                                {  
+                                    newTribe.insert(newTribe.end(), valid_neighbors.begin(), valid_neighbors.end());
+                                    for (auto n : valid_neighbors) 
+                                        map[n.first * N + n.second] = tribes.size();
+                                }
                             }
                             else                // found nearby existing tribe, add this group of lives to the tribe found
-                            {               
-                                tribes[nearbyT].insert(tribes[nearbyT].end(), valid_neighbors.begin(), valid_neighbors.end());
-                                for (auto n : valid_neighbors) 
-                                    map[n.first * N + n.second] = nearbyT;
+                            {        
+                                #pragma omp critical
+                                {        
+                                    tribes[nearbyT].insert(tribes[nearbyT].end(), valid_neighbors.begin(), valid_neighbors.end());
+                                    for (auto n : valid_neighbors) 
+                                        map[n.first * N + n.second] = nearbyT;
+                                }
                             }
                         }
                     }
                 }
                 register_new_tribe(newTribe);
+
             }
         }
 
@@ -323,6 +335,8 @@ private:
             if (!isInTribe(p, visited)) {
                 visited.push_back(p);
                 if (!isInTribe(p, new_neighbors)) new_neighbors.push_back(p);
+
+                #pragma parallel for schedule(dynamic, 20)
                 for (int r = p.first - radius; r <= p.first + radius; r++) {
                     for (int c = p.second - radius; c <= p.second + radius; c++) {
                         if (r == p.first && c == p.second) continue;                           // neighbor is p itself
@@ -339,6 +353,7 @@ private:
                         float delta_c = abs(neighbor.second - p.second);
                         if (delta_c * delta_c + delta_r * delta_r > radius * radius) continue; // neighbor is too far: distance > radius
                         
+                        #pragma omp critial
                         queue.push_back(neighbor);
                     }
                 }
