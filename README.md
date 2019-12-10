@@ -25,7 +25,7 @@ Game of Civilization: under GoC, run make baseline or make cuda
 
 
 ## Project Report <a name="final_report"></a>
-<a href="https://github.com/yatinghan/game_of_civilization/blob/master/Project%20Report%20-%20Google%20Docs.pdf?raw=true"> Project Report </a>  
+[Project Report](http://yatinghan.github.io/game_of_civilization/docs/report.pdf)
 ____
 
 
