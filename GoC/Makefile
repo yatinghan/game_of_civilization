@@ -5,9 +5,6 @@ cuda: AreaDivisionParallel.cpp ../GoL/gameOfLife.h ../GoL/gameOfLifeCuda.h ../Go
 	g++ -std=c++1y -m64 -fopenmp cudamain.cpp -O3 -g -c -o objs/cudamain.o
 	g++ -std=c++1y -m64 -O3 -g -fopenmp -o cudaGame objs/cudaGoL.o objs/cudamain.o objs/cudaRenderer.o -L/usr/local/depot/cuda-8.0/lib64/ -lcudart -lGL -lglut -lcudart
 
-seq : ../GoL/gameOfLife.h ../GoL/gameOfLifeSequential.h ../GoL/gameOfLifeSequential.cpp gameOfCivilization.h gameOfCivilizationSequential.h gameOfCivilizationSequential.cpp main.cpp
-	g++ -std=c++1y -m64 -O3 -g -o seqGame ../GoL/gameOfLife.h ../GoL/gameOfLifeSequential.h ../GoL/gameOfLifeSequential.cpp gameOfCivilization.h gameOfCivilizationSequential.h gameOfCivilizationSequential.cpp main.cpp
-
 baseline : ../GoL/gameOfLife.h ../GoL/gameOfLifeSequential.h ../GoL/gameOfLifeSequential.cpp gameOfCivilization.h gameOfCivilizationBaseline.h gameOfCivilizationBaseline.cpp baselinemain.cpp
 	g++ -std=c++1y -m64 -O3 -g -o baselineGame ../GoL/gameOfLife.h ../GoL/gameOfLifeSequential.h ../GoL/gameOfLifeSequential.cpp gameOfCivilization.h gameOfCivilizationBaseline.h gameOfCivilizationBaseline.cpp baselinemain.cpp
  
