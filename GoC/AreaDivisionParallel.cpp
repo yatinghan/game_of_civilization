@@ -149,6 +149,47 @@ private:
         return result;
     }
 
+    Matrix<Member> min_pooling(vector<int> input_matrix, int input_h, int input_w) 
+    {
+        #ifdef DEBUG
+        Timer t;
+        t.reset();
+        #endif 
+
+        int pool_result_height = input_h - MAX_POOL_SIZE + 1;
+        int pool_result_width = input_w - MAX_POOL_SIZE + 1;
+        vector<Member> pool_result(pool_result_height * pool_result_width, pair<int, int>(-1,-1)); 
+        
+        #pragma omp parallel for num_threads(4) schedule(dynamic, 5)
+        for (int grid_r = 0; grid_r < pool_result_height; grid_r++) {
+            for (int grid_c = 0; grid_c < pool_result_width; grid_c++) {
+                int min = 9999;
+                Member min_coord;
+                for (int mat_r = 0; mat_r < MAX_POOL_SIZE; mat_r ++) {
+                    for (int mat_c = 0; mat_c < MAX_POOL_SIZE; mat_c++) {
+                        int cur = input_matrix[(grid_r + mat_r) * input_w + (grid_c + mat_c)];
+                        if (cur <= min) {
+                            min = cur;
+                            min_coord = pair<int, int>(grid_r + mat_r, grid_c + mat_c);
+                        }
+                    }
+                }
+                if (min >= TRIBE_MIN_POPULATION-10)
+                    pool_result[grid_r * pool_result_width + grid_c] = min_coord;
+            }
+        }
+
+        Matrix<Member> result; 
+        result.matrix = pool_result;
+        result.height = pool_result_height;
+        result.width = pool_result_width;
+
+        #ifdef DEBUG
+        maxPoolingTime = t.elapsed();
+        #endif
+        return result;
+    }
+
     /* find the shortest distance to the tribe of given index */
     float distance_to_tribe(Member p, int tribe_index) 
     {
@@ -248,7 +289,7 @@ private:
         #endif 
 
         auto conv = this->convolution();
-        auto max_pool = this->max_pooling(conv.matrix, conv.height, conv.width);
+        auto max_pool = this->min_pooling(conv.matrix, conv.height, conv.width);
         
         for (int r = 0; r < max_pool.height; r++) {
             for (int c = 0; c < max_pool.width; c++) {

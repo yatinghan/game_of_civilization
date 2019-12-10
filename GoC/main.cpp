@@ -76,7 +76,7 @@ int main(int argc,char* argv[]) {
     }
     
     printf("Convolution time: %.6fms\n", convolutionTime * 1000.0f);
-    printf("Max pooling time: %.6fms\n", maxPoolingTime * 1000.0f);
+    printf("Min pooling time: %.6fms\n", maxPoolingTime * 1000.0f);
     printf("BFS time: %.6fms\n", bfsTime * 1000.0f);
     printf("Search nearby neighbor time: %.6fms\n", searchNearbyTribeTime * 1000.0f);
     printf("Total classification time: %.6fms\n", initTime * 1000.0f);
