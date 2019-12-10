@@ -1,2 +1,5 @@
 theme: jekyll-theme-hacker
 markdown: CommonMarkGhPages
+
+baseurl: "/game_of_civilization"
+url: "http://yatinghan/github.io/game_of_civilization"
