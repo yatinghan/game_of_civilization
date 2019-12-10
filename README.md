@@ -5,11 +5,13 @@ Yating Han (yatingh)
 Yuying Qian (yuyingq)
 
 ## Links
+
 <a href="https://github.com/yatinghan/game_of_civilization"> Project Repo </a>  
 <a href="https://yatinghan.github.io/game_of_civilization"> Project Website </a>  
 
 ## Table of contents
 [Running the Game](#running_the_game)  
+[Final Report](#final_report) 
 [Project Checkpoint](#project_checkpoint)  
 [Project Proposal](#project_proposal)  
 [Work Breakdown](#work_breakdown)  
@@ -17,9 +19,15 @@ Yuying Qian (yuyingq)
 ____
 
 ## Running the Game <a name="running_the_game"></a>
-No code yet :‘(
+Game of Life: under GoL, run make seq or make cuda  
+Game of Civilization: under GoC, run make baseline or make cuda  
 
+
+
+## Project Report <a name="final_report"></a>
+<a href="https://github.com/yatinghan/game_of_civilization/blob/master/Project%20Report%20-%20Google%20Docs.pdf"> Project Repo </a>  
 ____
+
 
 ## Project Checkpoint <a name="project_checkpoint"></a>
 
