@@ -27,8 +27,7 @@ SequentialGame::SequentialGame(int W, int H) {
 
     for (int i = 0; i < H; i++) {
         for (int j = 0; j < W; j++) 
-            if (i % 15 < 10 && j % 15 == 10) this->grid[IDX(i, j)] = true;
-            //if (i % 5 < 3 && j % 4 == 3) this->grid[IDX(i, j)] = true;
+            if (i % 15 < 10 && j % 15 == 10) this->grid[IDX(i, j)] = true; //strips
     }
 }
 

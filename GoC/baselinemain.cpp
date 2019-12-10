@@ -38,8 +38,9 @@ int main(int argc,char* argv[]) {
         return -1;
     }
 
-    //BaselineGoC* cuda_renderer = new BaselineGoC(width, height, "config.txt");
-    BaselineGoC* cuda_renderer = new BaselineGoC(width, height);
+    BaselineGoC* cuda_renderer = new BaselineGoC(width, height, "config.txt");
+    //BaselineGoC* cuda_renderer = new BaselineGoC(width, height);
+    //cuda_renderer->printGrid();
 
     double totalCudaTime = 0.0f;
     double totalSimTime = 0.0f;

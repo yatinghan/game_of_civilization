@@ -38,8 +38,8 @@ int main(int argc,char* argv[]) {
         return -1;
     }
 
-    CudaGoC* cuda_renderer = new CudaGoC(width, height);
-    //CudaGoC* cuda_renderer = new CudaGoC(width, height, "config.txt");
+    //CudaGoC* cuda_renderer = new CudaGoC(width, height);
+    CudaGoC* cuda_renderer = new CudaGoC(width, height, "config.txt");
 
     double totalCudaTime = 0.0f;
     double totalSimTime = 0.0f;

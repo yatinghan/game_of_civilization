@@ -41,6 +41,8 @@ int main(int argc,char* argv[]) {
     SequentialGoC* cuda_renderer = new SequentialGoC(width, height);
     //SequentialGoC* cuda_renderer = new SequentialGoC(width, height, "config.txt");
 
+    //cuda_renderer->printGrid();
+
     double totalCudaTime = 0.0f;
     double totalSimTime = 0.0f;
     double convolutionTime = 0.0f;

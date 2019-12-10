@@ -8,9 +8,9 @@
 
 #define DEBUG 1
 
-#define CONV_MATRIX_SIZE 10
+#define CONV_MATRIX_SIZE 12
 #define MAX_POOL_SIZE 10
-#define TRIBE_MIN_POPULATION 15
+#define TRIBE_MIN_POPULATION 18
 
 #define RESET   "\033[0m"
 #define BOLDBLACK   "\033[1m\033[40m"      /* Bold Black */
@@ -111,6 +111,7 @@ private:
     {
         vector<int> pool_result(input_h * input_w, 0); 
         
+        #pragma omp parallel for num_threads(4) schedule(dynamic, 10)
         for (int grid_r = 0; grid_r < input_h; grid_r++) {
             for (int grid_c = 0; grid_c < input_w; grid_c++) {
                 int min = 9999;
@@ -263,7 +264,7 @@ private:
         float shortest_distance = INFINITY;
         int closest_tribe = -1;
         
-        //pragma omp taskloop
+        #pragma omp taskloop
         for (Member p : group_of_wanderers) {
             for (int r = p.first - radius; r <= p.first + radius; r++) {
                 for (int c = p.second - radius; c <= p.second + radius; c++) {
@@ -274,7 +275,7 @@ private:
                     int t = getTribeMembership(neighbor);
                     if (t != -1) {
                         float d = distance_to_tribe(p, t);
-                        //pragma omp critical
+                        #pragma omp critical
                         {
                             if (d < shortest_distance) {
                                 shortest_distance = d;
